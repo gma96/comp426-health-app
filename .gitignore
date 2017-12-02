@@ -43,6 +43,8 @@ typings/
 .npm
 
 # Optional eslint cache
+
+./node_modules/
 .eslintcache
 
 # Optional REPL history

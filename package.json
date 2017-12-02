@@ -11,7 +11,7 @@
     "dev": "nodemon --watch src --exec 'npm run build && npm start'",
     "mock-server-build": "babel ./backend/mock/src/ --out-dir ./backend/mock/dist/",
     "mock-server-start": "node ./backend/mock/dist/server.js",
-    "mock-server-use": "nodemon --watch ./backend/mock/src/ --exec 'npm run mock-server-build && npm run mock-server-start'"
+    "mock-server": "nodemon --watch ./backend/mock/src/ --exec 'npm run mock-server-build && npm run mock-server-start'"
   },
   "repository": {
     "type": "git",
