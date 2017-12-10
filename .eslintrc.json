@@ -1,0 +1,24 @@
+{
+    "env": {
+        "es6": true,
+        "node": true,
+        "mocha": true
+    },
+    "extends": ["eslint:recommended", "google"],
+    "parserOptions": {
+        "ecmaFeatures": {
+            "experimentalObjectRestSpread": true,
+            "jsx": true
+        },
+        "sourceType": "module"
+    },
+    "parser": "babel-eslint",
+    "plugins": [
+        "flowtype",
+        "mocha",
+        "chai-friendly"
+    ],
+    "rules": {
+        "mocha/no-exclusive-tests": "error"
+    }
+}
