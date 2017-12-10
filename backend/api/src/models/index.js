@@ -23,5 +23,30 @@ db.Sequelize = Sequelize;
 
 // Import Models such that I can use them in the api just by importing 'db'
 db.user = require('./user')(sequelize, Sequelize);
+db.water = require('./water')(sequelize, Sequelize);
+db.weight = require('./weight')(sequelize, Sequelize);
+db.goal = require('./goal')(sequelize, Sequelize);
+db.mindfulness = require('./mindfulness')(sequelize, Sequelize);
+db.sleep = require('./sleep')(sequelize, Sequelize);
+
+// Associations
+// @see http://docs.sequelizejs.com/manual/tutorial/models-usage.html
+let _foreignKey = {foreignKey: 'user_id'};
+// water association
+db.water.belongsTo(db.user, _foreignKey);
+db.user.hasMany(db.water, _foreignKey);
+// weight association
+db.weight.belongsTo(db.user, _foreignKey);
+db.user.hasMany(db.weight, _foreignKey);
+// goal association
+db.goal.belongsTo(db.user, _foreignKey);
+db.user.hasMany(db.goal, _foreignKey);
+// mindfulness association
+db.mindfulness.belongsTo(db.user, _foreignKey);
+db.user.hasMany(db.mindfulness, _foreignKey);
+// sleep association
+db.sleep.belongsTo(db.user, _foreignKey);
+db.user.hasMany(db.sleep, _foreignKey);
+
 
 module.exports = db;
