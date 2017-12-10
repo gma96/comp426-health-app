@@ -108,7 +108,7 @@ controller.delete = (req: Object, res: Object, next: Function) => {
       });
     }
     return res.bad().error('ResourceDeleteError', `${_name}.delete`,
-            `Resource with _id = ${req.token._id} not found`).resolve(400);
+            `Resource with _id = ${req.token._id} not found`).resolve(404);
   })
   .catch((e) => {
     log.error(e);

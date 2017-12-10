@@ -129,7 +129,7 @@ userController.delete = (req: Object, res: Object, next: Function) => {
       });
     }
     return res.bad().error('FailedDelete', 'user.delete',
-            `User with _id = ${req.token._id} not found`).resolve(400);
+            `User with _id = ${req.token._id} not found`).resolve(404);
   })
   .catch((e) => {
     log.error(e);
