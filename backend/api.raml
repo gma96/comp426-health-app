@@ -125,16 +125,7 @@ securitySchemes:
   jwt:
     type: x-jwt
 
-/token:
-  get:
-    displayName: token
-
 /users:
-  get:
-    displayName: user.get
-    description: get user test
-    securedBy: jwt
-
   post:
     displayName: user.create
     description: Create a new user
@@ -145,16 +136,6 @@ securitySchemes:
         body:
           application/json:
             type: User
-          # example: |
-          #   {
-          #     "meta": {"code": 200, "message": "User Created"}
-          #     "data": [{
-          #         "resource": "user",
-          #         "_id": "j0_o",
-          #         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
-          #       }]
-          #   }
-          #   
   /login:
     post:
       displayName: user.login
@@ -175,6 +156,30 @@ securitySchemes:
           body:
             application/json:
   /me:
+    get:
+      displayName: user.profile
+      description: User profile information
+      securedBy: jwt
+      responses:
+        200:
+          body:
+            application/json:
+              type: User
+        400:
+          body:
+            application/json:
+              example: |
+                {
+                  "errors": [{
+                    "type": "<string>",
+                    "dataPath": "<string.deleimitted>",
+                    "message": "<string>"
+                  }]
+                }
+              properties:
+                errors:
+                  type: array
+
     delete:
       displayName: user.delete
       description: Delete user
@@ -182,3 +187,5 @@ securitySchemes:
       responses:
         202:
         400:
+          body:
+            application/json:

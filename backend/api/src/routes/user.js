@@ -5,5 +5,6 @@ module.exports = (router) => {
   router.route('/users/login')
     .post(userController.login);
   router.route('/users/me')
+    .get(userController.read)
     .delete(userController.delete);
 };

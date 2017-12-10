@@ -1,18 +1,21 @@
 // @flow
 'use strict';
+// Import NPM Modules
 const shortid = require('shortid');
+const bcrypt = require('bcrypt');
+// Import local files
+const {LOGIN_ERROR} = require('../config/lang/user-enUs'); // Language File
+const jwt = require('../lib/jwt-manager');
+const db = require('../models');
+const log = require('../../../../libs/logger');
+// Unit options map
 const userUnitObj = {
   imperial: 'imperial',
   metric: 'metric',
 };
-const {LOGIN_ERROR} = require('../config/lang/user-enUs');
-const db = require('../models');
-const validator = require('validator');
-const jwt = require('../lib/jwt-manager');
-const log = require('../../../../libs/logger');
-const bcrypt = require('bcrypt');
-const userController = {};
 
+// Controller to export
+const userController = {};
 
 // check for unique email (name is misleading)
 const _isIdUnique = function(email) {
@@ -31,7 +34,7 @@ userController.create = (req: Object, res: Object, next: Function) => {
     _id: shortid(),
     first_name: req.body.first_name,
     last_name: req.body.last_name,
-    birthdate: validator.toDate(req.body.birthdate),
+    birthdate: req.body.birthdate,
     email: req.body.email,
     password: req.body.password,
     height: req.body.height,
@@ -61,6 +64,21 @@ userController.create = (req: Object, res: Object, next: Function) => {
   });
 };
 
+userController.read = (req: Object, res: Object, next: Function) => {
+  // Token already verified by middleware
+  let token = req.token;
+  db.user.findOne({where: {_id: token._id}})
+    .then((user) => {
+      user = user.dataValues;
+      delete user.password;
+      return res.build().data(user).resolve(200);
+    })
+    .catch((e) => {
+      return res.build().error('ReadError', 'user.profile', e.message)
+              .resolve(400);
+    });
+};
+
 // Login Function
 userController.login = (req: Object, res: Object, next: Function) => {
   let _reject = (message) => {
@@ -70,7 +88,7 @@ userController.login = (req: Object, res: Object, next: Function) => {
     where: {
       email: req.body.email,
     },
-    plain: true,
+    attributes: ['_id', 'email', 'unit', 'password'],
   }).then((user) => {
     bcrypt.compare(req.body.password, user.password, (e, valid: Boolean) => {
       // Check for error

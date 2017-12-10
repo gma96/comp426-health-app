@@ -1,18 +1,4 @@
-// // Require the dev-dependencies
-// const chai = require('chai');
-// process.env.NODE_ENV = 'test';
-
-// // ***************************************************
-// // ** JWT STUFF                                     **
-// // ***************************************************
-// const JWTManager = require('../../lib/jwt-manager');
-// // ***************************************************
-// // ** END JWT STUFF                                 **
-// // ***************************************************
-// // Require Database Object
-// const db = require('../../models/index');
-// const catchLog = (e) => (e);
-
+'use strict';
 const {chai, db, JWTManager, catchLog, user1, user2} = require('./user-setup');
 
 // CHAI http lib
@@ -176,6 +162,42 @@ describe('Users', () => {
   // ***************************************************
   describe('/api/v1/users/me', () => {
     let routeContext = '/api/v1/users/me';
+    // Succesful profiles
+    it('get User1 profile', (done) => {
+      request
+        .get(routeContext).set('Authorization', `Bearer ${user1Token}`)
+        .send()
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          let user = Object.assign({}, user1);
+          delete user.password;
+          let body = Object.assign({}, res.body.data[0]);
+          delete body.createdAt;
+          delete body.updatedAt;
+          delete body._id;
+          body.should.be.eql(user);
+          done();
+        });
+    });
+
+    it('get User2 profile', (done) => {
+      request
+        .get(routeContext).set('Authorization', `Bearer ${user2Token}`)
+        .send()
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          let user = Object.assign({}, user2);
+          delete user.password;
+          let body = Object.assign({}, res.body.data[0]);
+          delete body.createdAt;
+          delete body.updatedAt;
+          delete body._id;
+          body.should.be.eql(user);
+          done();
+        });
+    });
 
     // Succesful delete
     it('delete User1', (done) => {
