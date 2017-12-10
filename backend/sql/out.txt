@@ -1,0 +1,1 @@
+CREATE DATABSE IF NOT EXISTS '426_health_app_{mode}';

@@ -4,12 +4,15 @@
   "description": "'RESTful Web App: Class Project'",
   "main": "index.js",
   "scripts": {
-    "test": "npm run build && mocha ./dist/api/tests/**/*Test.js --reporter spec --exit --use_strict",
+    "test-backend": "npm run server-build && mocha ./backend/api/dist/tests/**/*.test.js --reporter spec --exit --use_strict",
     "start": "node ./dist/server.js",
     "mocha": "mocha --requires js:babel-core/register",
     "build": "babel src/ --out-dir dist/ ",
     "dev": "nodemon --watch src --exec 'npm run build && npm start'",
     "app-build": "babel ./frontend/src/ --out-dir ./frontend/dist/",
+    "server-build": "rimraf ./backend/api/dist/ && babel ./backend/api/src/ --out-dir ./backend/api/dist/",
+    "server-start": "node ./backend/api/dist/server.js",
+    "server": "nodemon --watch ./backend/api/src/ --exec 'npm run server-build && npm run server-start'",
     "mock-server-build": "babel ./backend/mock/src/ --out-dir ./backend/mock/dist/",
     "mock-server-start": "node ./backend/mock/dist/server.js",
     "mock-server": "nodemon --watch ./backend/mock/src/ --exec 'npm run mock-server-build && npm run mock-server-start'"
@@ -25,13 +28,19 @@
   },
   "homepage": "https://github.com/pmr1027/comp426-health-app#readme",
   "dependencies": {
+    "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
+    "cookie-parser": "^1.4.3",
     "cors": "^2.8.4",
     "express": "^4.16.2",
     "express-jwt": "^5.3.0",
     "jsonwebtoken": "^8.1.0",
-    "mongoose": "^4.12.6",
-    "morgan": "^1.9.0"
+    "morgan": "^1.9.0",
+    "mysql2": "^1.5.1",
+    "osprey": "^0.4.1",
+    "sequelize": "^4.27.0",
+    "sequelize-cli": "^3.2.0",
+    "shortid": "^2.2.8"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

@@ -74,7 +74,7 @@ Rest.routes.user.create({
   data: {
     first_name: 'Joe',
     last_name: 'Smith',
-    birthdate: '1980-10-10'
+    birthdate: '1980-10-10',
     email: 'joe.smith@email.com',
     password: 'password'
   }

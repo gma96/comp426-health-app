@@ -1,0 +1,14 @@
+-- Users 
+CREATE TABLE user (
+	_id VARCHAR(14) NOT NULL,
+	createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	first_name VARCHAR(40) NOT NULL,
+	last_name VARCHAR(40) NOT NULL,
+	birthdate DATE NOT NULL,
+	email VARCHAR(40) NOT NULL,
+	password VARCHAR(300) NOT NULL,
+	height INT UNSIGNED,
+	unit ENUM('imperial', 'metric') NOT NULL DEFAULT 'imperial',
+	PRIMARY KEY (_id)
+);

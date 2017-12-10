@@ -1,0 +1,156 @@
+#%RAML 1.0
+title: 426 REST API
+mediaType: application/json
+version: v1
+protocols: [ HTTP, HTTPS ]
+baseUri: http://127.0.0.1:8080/api/v1/ # really should be {version}, but parsing lib doesn't support :(
+
+types:
+  User:
+    type: object
+    properties:
+      _id:
+        type: string # primary key of entity
+        required: false
+      first_name:
+        type: string
+        required: true
+      last_name:
+        type: string
+        required: true
+      birthdate:
+        type: date-only
+        required: true
+      email:
+        type: string
+        required: true
+        pattern: (?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])
+      password:
+        type: string
+        required: true
+      height:
+        type: integer # will store in metric (allow imperial unit, do conversion)
+        required: false
+      unit:
+        enum: [ imperial, metric ]
+        required: true
+        default: imperial
+  Goal:
+    type: object
+    properties:
+      _id:
+        type: string # primary key of entity
+        required: true
+      context:
+        type: string # dot deleimitted string that defines goal context intake.min
+        required: true
+      target_val:
+        type: integer # quantifiable value goal defined by the user
+        required: true
+  Weight:
+    type: object
+    properties:
+      _id: # not really needed could be user id and date (user_id derived from token)
+        type: integer # primary key of entity
+        required: true
+      user_id:
+        type: string
+        required: true
+      date:
+        type: date-only # auto or set
+        required: true
+      value:
+        type: integer # in metric
+        required: true
+  Water_Intake:
+    type: object
+    properties:
+      _id: # not really needed could be user id and date (user_id derived from token)
+        type: integer # primary key of entity
+        required: true
+      user_id:
+        type: string
+        required: true
+      date:
+        type: date-only # auto or set
+        required: true
+      value:
+        type: integer # in metric Milliliters
+        required: true
+  Mindfulness:
+    type: object
+    properties: 
+      _id: # not really needed could be user id and date (user_id derived from token)
+        type: integer # primary key of entity
+        required: true
+      user_id:
+        type: string
+        required: true
+      date:
+        type: date-only
+        required: true
+      minutes:
+        type: integer
+        required: true
+      notes:
+        type: string
+        required: false
+  Sleep:
+    type: object
+    properties:
+      _id:
+        type: string # primary key of entity
+        required: true # not really needed could be user id and date (user_id derived from token)
+      user_id:
+        type: string
+        required: true
+      date:
+        type: date-only
+        required: true
+      minutes:
+        type: integer
+        required: true
+        minimum: 0
+        maximum: 1440
+      quality:
+        type: integer
+        required: false
+        minimum: 0
+        maximum: 10
+      notes:
+        type: string
+        required: false
+
+securitySchemes:
+  jwt:
+    type: x-jwt
+
+/token:
+  get:
+    displayName: token
+
+/users:
+  get:
+    displayName: user.get
+    description: get user test
+    securedBy: jwt
+
+  post:
+    displayName: user.create
+    description: Create a new user
+    body:
+      type: User
+    responses:
+      200:
+        body:
+          application/json:
+            type: User
+          # example: |
+          #   {
+          #     "meta": {"code": 200, "message": "User Created"}
+          #     "data": [{
+          #         "resource": "user",
+          #         "_id": "j0_o",
+          #         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+          #       }]
+          #   }
