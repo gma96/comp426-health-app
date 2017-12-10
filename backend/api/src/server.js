@@ -8,6 +8,7 @@ const middleware426 = require('./lib/res-middleware');
 const morgan = require('morgan');
 const log = require('../../../libs/logger');
 const PORT = process.env.PORT || 3000;
+const env = process.env.NODE_ENV || 'development';
 
 // API Config
 const apiDir = join(__dirname, '../../api.raml');
@@ -76,7 +77,7 @@ const server = (function() {
 osprey.loadFile(apiDir, authHandler).then((middleware) => {
   const router = osprey.Router();
   const app = express();
-  app.use(morgan('tiny'));
+  if (env !== 'test') app.use(morgan('tiny'));
   app.use(cookieParser());
   app.use(middleware426());
   app.use('/api/v1', middleware, router);
@@ -103,11 +104,11 @@ osprey.loadFile(apiDir, authHandler).then((middleware) => {
   });
 
   server.hookStart(function() {
-    log.info('Sever has started hook');
+    if (env !== 'test') log.info('Sever has started hook');
   });
 
   server.open(app, PORT, (d, v) => {
-    log.info(`Mock Server Running on Port: ${v.port}`);
+    if (env !== 'test') log.info(`Mock Server Running on Port: ${v.port}`);
   });
 }).catch((e)=> {
   log.error(e);
