@@ -14,6 +14,7 @@ const bcrypt = require('bcrypt');
 const userController = {};
 
 
+// check for unique email (name is misleading)
 const _isIdUnique = function(email) {
     return db.user.count({where: {email: email}})
       .then((count) => {
@@ -24,6 +25,7 @@ const _isIdUnique = function(email) {
     });
 };
 
+// Creates a new user if applicable
 userController.create = (req: Object, res: Object, next: Function) => {
   let user = {
     _id: shortid(),
@@ -58,6 +60,8 @@ userController.create = (req: Object, res: Object, next: Function) => {
     }
   });
 };
+
+// Login Function
 userController.login = (req: Object, res: Object, next: Function): Promise => {
   let _reject = (message) => {
     return res.status(401).json({
@@ -94,6 +98,34 @@ userController.login = (req: Object, res: Object, next: Function): Promise => {
     _reject(LOGIN_ERROR);
   });
 };
-userController.delete = (req: Object, res: Object, next: Function) => {};
+
+// Cascade delete
+userController.delete = (req: Object, res: Object, next: Function) => {
+  let where = {where: {_id: req.token._id}};
+  Promise.all([
+    // db.goal.destroy(where),
+    // db.water.destroy(where),
+    // db.weight.destroy(where),
+    // db.mindfulness.destroy(where),
+    // db.sleep.destroy(where),
+    db.user.destroy(where),
+  ])
+  .then((deleted) => {
+    if (deleted[0] === 1) {
+      return res.status(202).json({
+        message: `Deleted user with _id = ${req.token._id}`,
+      });
+    }
+    res.bad()
+      .error('FailedDelete', 'user.delete',
+      `User with _id = ${req.token._id} not found`)
+      .resolve(400);
+  })
+  .catch((e) => {
+    log.error(e);
+    return res.bad()
+              .error('FailedDelete', 'user.delete', e.message).resolve(400);
+  });
+};
 
 module.exports = userController;

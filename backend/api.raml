@@ -174,3 +174,11 @@ securitySchemes:
         401:
           body:
             application/json:
+  /me:
+    delete:
+      displayName: user.delete
+      description: Delete user
+      securedBy: jwt
+      responses:
+        202:
+        400:

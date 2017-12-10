@@ -3,6 +3,7 @@ const osprey = require('osprey');
 const join = require('path').join;
 const cookieParser = require('cookie-parser'); // Don't think we're going to use
 const jwt = require('./lib/jwt-manager');
+const middleware426 = require('./lib/res-middleware');
 // Loggers
 const morgan = require('morgan');
 const log = require('../../../libs/logger');
@@ -21,7 +22,7 @@ const handler = function() {
     }
     jwt.verify(token)
     .then((decoded) => {
-        req.decoded = decoded;
+        req.token = decoded;
         return next();
     }).catch((e) => {
       return next(e);
@@ -43,7 +44,7 @@ const server = (function() {
   const open = function(app, port, c) {
     if (_server) return _server;
     _server = app.listen(PORT, (data) => {
-      c(data, {app, port});
+      if (c) c(data, {app, port});
       _hookStart.forEach((f) => {
         f();
       });
@@ -77,6 +78,7 @@ osprey.loadFile(apiDir, authHandler).then((middleware) => {
   const app = express();
   app.use(morgan('tiny'));
   app.use(cookieParser());
+  app.use(middleware426());
   app.use('/api/v1', middleware, router);
 
   router.get('/token', handler, (req, res) => {

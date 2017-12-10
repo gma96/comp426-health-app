@@ -4,4 +4,6 @@ module.exports = (router) => {
     .post(userController.create);
   router.route('/users/login')
     .post(userController.login);
+  router.route('/users/me')
+    .delete(userController.delete);
 };
