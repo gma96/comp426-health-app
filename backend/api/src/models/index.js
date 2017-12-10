@@ -4,7 +4,7 @@ const env = process.env.NODE_ENV || 'development';
 const config = require(__dirname + '/../config/database')[env];
 const db = {};
 const log = require('../../../../libs/logger');
-let logger = {logging: log.info};
+let logger = {logging: false};
 if (env == 'test') logger = {logging: false};
 const sequelize = new Sequelize(config.database, config.username,
                                 config.password,

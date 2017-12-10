@@ -4,7 +4,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(14),
       primaryKey: true,
     },
-    created: DataTypes.DATE,
     first_name: DataTypes.STRING,
     last_name: DataTypes.STRING,
     birthdate: DataTypes.DATEONLY,

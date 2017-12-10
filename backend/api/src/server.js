@@ -39,10 +39,14 @@ const authHandler = {
 // Having problems with testing.. needed for mocha, probably not the right way..
 const server = (function() {
   let _server = null;
+  let _hookStart = [];
   const open = function(app, port, c) {
     if (_server) return _server;
     _server = app.listen(PORT, (data) => {
       c(data, {app, port});
+      _hookStart.forEach((f) => {
+        f();
+      });
     });
   };
   const get = function() {
@@ -55,11 +59,16 @@ const server = (function() {
   const address = function() {
     return _server.address();
   };
+  const hookStart = function(f: Function): Boolean {
+    _hookStart.push(f);
+    return true;
+  };
   return {
     open,
     get,
     close,
     address,
+    hookStart,
   };
 })();
 
@@ -80,12 +89,19 @@ osprey.loadFile(apiDir, authHandler).then((middleware) => {
   app.use((err, req, res, next) => {
     log.error(err);
     if (err && err.ramlAuthorization == true) {
-      res.status(401).json(err);
+      return res.status(401).json(err);
+    }
+    if (err) {
+      return res.status(400).json(err);
     }
   });
 
   app.all('*', (req, res) => {
     res.status(404).json({code: 404, message: 'Not Found'});
+  });
+
+  server.hookStart(function() {
+    log.info('Sever has started hook');
   });
 
   server.open(app, PORT, (d, v) => {

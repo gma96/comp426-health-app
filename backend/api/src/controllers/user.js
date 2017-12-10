@@ -5,11 +5,14 @@ const userUnitObj = {
   imperial: 'imperial',
   metric: 'metric',
 };
+const {LOGIN_ERROR} = require('../config/lang/user-enUs');
 const db = require('../models');
 const validator = require('validator');
 const jwt = require('../lib/jwt-manager');
+const log = require('../../../../libs/logger');
 const bcrypt = require('bcrypt');
 const userController = {};
+
 
 const _isIdUnique = function(email) {
     return db.user.count({where: {email: email}})
@@ -55,7 +58,42 @@ userController.create = (req: Object, res: Object, next: Function) => {
     }
   });
 };
-userController.find = (req: Object, res: Object, next: Function) => {};
+userController.login = (req: Object, res: Object, next: Function): Promise => {
+  let _reject = (message) => {
+    return res.status(401).json({
+      errors: [{
+        type: 'LoginFailed',
+        dataPath: 'user.login',
+        message,
+      }],
+    });
+  };
+  db.user.findOne({
+    where: {
+      email: req.body.email,
+    },
+    plain: true,
+  }).then((user) => {
+    bcrypt.compare(req.body.password, user.password, (e, valid: Boolean) => {
+      // Check for error
+      if (e) log.error(e);
+      // Remove password hash from return token
+      user = user.dataValues;
+      delete user.password;
+      // valid == true
+      if (valid) {
+        return res.json({data: [{
+          _id: user._id,
+          token: jwt.issue(user),
+        }]});
+      }
+      _reject(LOGIN_ERROR);
+    });
+  }).catch((e) => {
+    log.error(e);
+    _reject(LOGIN_ERROR);
+  });
+};
 userController.delete = (req: Object, res: Object, next: Function) => {};
 
 module.exports = userController;
