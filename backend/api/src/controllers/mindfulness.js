@@ -6,7 +6,7 @@ const db = require('../models');
 const log = require('../../../../libs/logger');
 
 const controller = {};
-const _name:string = 'mindfullness';
+const _name:string = 'mindfulness';
 
 const _convert = function(v:number):number {
   return v;
