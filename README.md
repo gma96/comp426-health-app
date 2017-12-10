@@ -1,6 +1,13 @@
 # comp426-health-app
 RESTful Web App: Class Project
 
+# NPM Commands
+```bash
+$ npm install # do this first
+$ npm run server # build and starts server
+$ npm run test-backend # tests backend functions
+```
+
 # API Routing
 For API routing we will be documenting using [RAML](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md/).
 We will be using displayName property as the context of our routes.

@@ -62,15 +62,9 @@ userController.create = (req: Object, res: Object, next: Function) => {
 };
 
 // Login Function
-userController.login = (req: Object, res: Object, next: Function): Promise => {
+userController.login = (req: Object, res: Object, next: Function) => {
   let _reject = (message) => {
-    return res.status(401).json({
-      errors: [{
-        type: 'LoginFailed',
-        dataPath: 'user.login',
-        message,
-      }],
-    });
+    return res.bad().error('LoginFailed', 'user.login', message).resolve(401);
   };
   db.user.findOne({
     where: {
@@ -86,10 +80,10 @@ userController.login = (req: Object, res: Object, next: Function): Promise => {
       delete user.password;
       // valid == true
       if (valid) {
-        return res.json({data: [{
+        return res.build().data({
           _id: user._id,
           token: jwt.issue(user),
-        }]});
+        }).resolve(200);
       }
       _reject(LOGIN_ERROR);
     });
