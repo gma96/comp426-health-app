@@ -48,7 +48,7 @@ userController.create = (req: Object, res: Object, next: Function) => {
         user.password = hash;
         db.user.create(user).then((result) => {
         delete user.password;
-        return res.json({
+        return res.status(201).json({
           data: [{
             resource: 'user',
             _id: user._id,

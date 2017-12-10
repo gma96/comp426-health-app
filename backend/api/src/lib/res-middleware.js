@@ -29,7 +29,7 @@ module.exports = function() {
         this.fields[k] = v;
         return this;
       };
-      this.resolve = (s) => {
+      this.resolve = (s=200) => {
         let r = {};
         if (this.errors.length > 0) r.errors = this.errors;
         if (this.dataStore.length > 0) r.data = this.dataStore;
