@@ -1,7 +1,7 @@
 {
   "name": "comp426-health-app",
   "version": "1.0.0",
-  "description": "'RESTful Web App: Class Project'",
+  "description": "RESTful Web App: Class Project",
   "main": "index.js",
   "scripts": {
     "test-backend": "npm run server-build && mocha ./backend/api/dist/tests/**/*.test.js --reporter spec --exit --use_strict",
@@ -21,7 +21,7 @@
     "type": "git",
     "url": "git+https://github.com/pmr1027/comp426-health-app.git"
   },
-  "author": "'Austin Tinsley, Eric Xin, Grace Abellanosa, Preston Robinson'",
+  "author": "Austin Tinsley, Eric Xin, Grace Abellanosa, Preston Robinson",
   "license": "Unlicense",
   "bugs": {
     "url": "https://github.com/pmr1027/comp426-health-app/issues"
