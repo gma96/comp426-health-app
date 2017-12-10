@@ -13,9 +13,9 @@ const sequelize = new Sequelize(config.database, config.username,
 sequelize
 .authenticate()
   .then(() => {
-  // console.log('Connection has been established successfully.');
+    log.info('Connection has been established successfully.');
   }).catch((err) => {
-    // console.log('Unable to connect to the database:', err);
+    log.error('Unable to connect to the database:', err);
   });
 
 db.sequelize = sequelize;
@@ -47,6 +47,5 @@ db.user.hasMany(db.mindfulness, _foreignKey);
 // sleep association
 db.sleep.belongsTo(db.user, _foreignKey);
 db.user.hasMany(db.sleep, _foreignKey);
-
 
 module.exports = db;

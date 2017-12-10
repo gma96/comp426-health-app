@@ -41,6 +41,26 @@ controller.create = (req: Object, res: Object, next: Function) => {
     });
 };
 // TODO
+controller.list = (req: Object, res: Object, next: Function) => {
+  // Find in DB
+  db.[_name].findAll({
+    where: {
+      user_id: req.token._id,
+    },
+  })
+  .then((result) => {
+    return res.build().data(result.dataValues).resolve();
+  })
+  .catch((e) => {
+    log.error(e);
+    return res.build().error({
+      type: 'ResourceListError',
+      dataPath: `${_name}.list`,
+      message: e.message || 'An error occured :(',
+    }).resolve(400);
+  });
+};
+// TODO
 controller.read = (req: Object, res: Object, next: Function) => {
   // Find in DB
   db.[_name].findOne({

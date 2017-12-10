@@ -4,6 +4,7 @@ const _name:string = 'water';
 const controller:Object = require(`../controllers/${_name}`); // :( Flow no like
 module.exports = (router: Object) => {
   router.route(`${_name}`)
+    .get(controller.list)
     .post(controller.create);
   // Need to think about: should this be part of user path or own path???
   // /users/me/${name}/:_id?
