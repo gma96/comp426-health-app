@@ -21,7 +21,7 @@ processors.fields = (_path:string, _fields:Array<string>, reqFields:string) => {
         e.values = difference;
         return reject(e);
       }
-      return resolve();
+      return resolve(fields);
     } else return reject(e);
   });
 };
