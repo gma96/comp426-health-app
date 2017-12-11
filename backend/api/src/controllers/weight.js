@@ -10,10 +10,6 @@ const controller = {};
 const _name:string = 'weight';
 const _fields:Array<string> = [];
 
-const _convert = function(v:number):number {
-  return v;
-};
-
 // TODO
 controller.create = (req: Object, res: Object, next: Function) => {
   // Osprey will take care of validating for us

@@ -69,19 +69,7 @@ controller.read = (req: Object, res: Object, next: Function) => {
       _id: req._id,
     },
   };
-  let fields:?Array<string> = req.query.fields.toLowerCase().split(',') || null;
-  if (fields) {
-    let difference = _difference(fields, _fields);
-    if (difference.length > 0) {
-      return res.build().error({
-        type: 'ResourceFieldsError',
-        dataPath: `${_name}.read`,
-        message: 'Invalid field values',
-        values: difference,
-      }).resolve(400);
-    }
-    query.attributes = fields;
-  }
+  
   // Find in DB
   db[_name].findOne(query)
   .then((result) => {

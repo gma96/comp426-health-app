@@ -51,7 +51,7 @@ types:
     type: object
     properties:
       _id: # not really needed could be user id and date (user_id derived from token)
-        type: integer # primary key of entity
+        type: string # primary key of entity
         required: true
       user_id:
         type: string
@@ -60,13 +60,14 @@ types:
         type: date-only # auto or set
         required: true
       value:
-        type: integer # in metric
+        type: number # in metric Kilograms
+        format: float
         required: true
   Water:
     type: object
     properties:
       _id: # not really needed could be user id and date (user_id derived from token)
-        type: integer # primary key of entity
+        type: string # primary key of entity
         required: true
       user_id:
         type: string
@@ -75,13 +76,14 @@ types:
         type: date-only # auto or set
         required: true
       value:
-        type: integer # in metric Milliliters
+        type: number # in metric militers
+        format: float
         required: true
   Mindfulness:
     type: object
     properties: 
       _id: # not really needed could be user id and date (user_id derived from token)
-        type: integer # primary key of entity
+        type: string # primary key of entity
         required: true
       user_id:
         type: string
@@ -136,7 +138,7 @@ securitySchemes:
     body:
       type: User
     responses:
-      200:
+      201:
         body:
           application/json:
             type: User
@@ -197,6 +199,9 @@ securitySchemes:
           body:
             application/json:
               type: User
+        404:
+          body:
+            application/json:
         400:
           body:
             application/json:
@@ -218,6 +223,7 @@ securitySchemes:
       securedBy: jwt
       responses:
         202:
+        404:
         400:
           body:
             application/json:
