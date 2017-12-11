@@ -62,7 +62,7 @@ types:
       value:
         type: integer # in metric
         required: true
-  Water_Intake:
+  Water:
     type: object
     properties:
       _id: # not really needed could be user id and date (user_id derived from token)
@@ -86,12 +86,15 @@ types:
       user_id:
         type: string
         required: true
-      date:
-        type: date-only
+      start_datetime:
+        type: datetime
+        required: true
+      end_datetime:
+        type: datetime
         required: true
       minutes:
         type: integer
-        required: true
+        required: false
       notes:
         type: string
         required: false
@@ -104,14 +107,15 @@ types:
       user_id:
         type: string
         required: true
-      date:
-        type: date-only
+      start_datetime:
+        type: datetime
+        required: true
+      end_datetime:
+        type: datetime
         required: true
       minutes:
         type: integer
-        required: true
-        minimum: 0
-        maximum: 1440
+        required: false
       quality:
         type: integer
         required: false
@@ -136,24 +140,28 @@ securitySchemes:
         body:
           application/json:
             type: User
+      400:
+        body:
+          application/json:
+            properties:
+              errors:
+                type: array
   /verify:
     post:
       displayName: user.verify
       description: Check authenticity of user's token
+      securedBy: jwt
       responses:
         204:
         401:
-
   /renew:
     post:
       displayName: user.renew
       description: Renew user's token
+      securedBy: jwt
       responses:
-        200:
+        204:
         401:
-          body:
-            application/json:
-
   /login:
     post:
       displayName: user.login
@@ -178,6 +186,12 @@ securitySchemes:
       displayName: user.profile
       description: User profile information
       securedBy: jwt
+      queryParameters:
+          fields:
+            description: Specify the fields that you want to retrieve
+            type:        string
+            required:    false
+            example:     start_datetime, end_datetime
       responses:
         200:
           body:
@@ -207,3 +221,405 @@ securitySchemes:
         400:
           body:
             application/json:
+/weight:
+  get:
+    displayName: weight.list
+    description: Create a new weight resource
+    securedBy: jwt 
+    queryParameters:
+      page:
+        description: Specify the page that you want to retrieve
+        type:        integer
+        required:    true
+        example:     1
+      per_page:
+        description: Specify the amount of items that will be retrieved per page
+        type:        integer
+        minimum:     10
+        maximum:     200
+        default:     30
+        example:     50
+    responses:
+      200:
+        body:
+          application/json:
+            type: Weight[]
+      400:
+        body:
+          application/json:
+            properties:
+              errors:
+                type: array
+  post:
+    displayName: weight.create
+    description: Create a new weight resource
+    securedBy: jwt 
+    body:
+      properties: # Don't need the other properties because JWT tells us
+        date:
+          type: date-only # auto or set
+          required: true
+        value:
+          type: integer # in metric
+          required: true
+    responses:
+      200:
+        body:
+          application/json:
+            type: Weight
+      400:
+        body:
+          application/json:
+            properties:
+              errors:
+                type: array
+  /{_id}:
+    get:
+        displayName: weight.read
+        description: Get weight with _id
+        securedBy: jwt
+        queryParameters:
+          fields:
+            description: Specify the fields that you want to retrieve
+            type:        string
+            required:    false
+            example:     start_datetime, end_datetime
+        responses:
+          200:
+            body:
+              application/json:
+                type: Weight
+          400:
+            body:
+              application/json:
+                properties:
+                  errors:
+                    type: array
+    patch:
+        displayName: weight.update
+        description: Update weight with _id
+        securedBy: jwt
+        responses:
+          202:
+          400:
+            body:
+              application/json:
+                properties:
+                  errors:
+                    type: array
+    delete:
+        displayName: weight.delete
+        description: Delete weight with _id
+        securedBy: jwt
+        responses:
+          202:
+          400:
+            body:
+              application/json:
+                properties:
+                  errors:
+                    type: array
+/water:
+  get:
+    displayName: water.list
+    description: Create a new water resource
+    securedBy: jwt 
+    queryParameters:
+      page:
+        description: Specify the page that you want to retrieve
+        type:        integer
+        required:    true
+        example:     1
+      per_page:
+        description: Specify the amount of items that will be retrieved per page
+        type:        integer
+        minimum:     10
+        maximum:     200
+        default:     30
+        example:     50
+    responses:
+      200:
+        body:
+          application/json:
+            type: Water[]
+      400:
+        body:
+          application/json:
+            properties:
+              errors:
+                type: array
+  post:
+    displayName: water.create
+    description: Create a new water resource
+    securedBy: jwt 
+    body:
+      application/json:
+        properties: # Don't need the other properties because JWT tells us
+          date:
+            type: date-only # auto or set
+            required: true
+          value:
+            type: integer # in metric
+            required: true
+    responses:
+      200:
+        body:
+          application/json:
+            type: Water
+      400:
+        body:
+          application/json:
+            properties:
+              errors:
+                type: array
+  /{_id}:
+    get:
+        displayName: water.read
+        description: Get water with _id
+        securedBy: jwt
+        queryParameters:
+          fields:
+            description: Specify the fields that you want to retrieve
+            type:        string
+            required:    false
+            example:     start_datetime, end_datetime
+        responses:
+          200:
+            body:
+              application/json:
+                type: Water
+          400:
+            body:
+              application/json:
+                properties:
+                  errors:
+                    type: array
+    patch:
+        displayName: water.update
+        description: Update water with _id
+        securedBy: jwt
+        responses:
+          202:
+          400:
+            body:
+              application/json:
+                properties:
+                  errors:
+                    type: array
+    delete:
+        displayName: water.delete
+        description: Delete water with _id
+        securedBy: jwt
+        responses:
+          202:
+          400:
+            body:
+              application/json:
+                properties:
+                  errors:
+                    type: array
+
+/sleep:
+  get:
+    displayName: sleep.list
+    description: Create a new sleep resource
+    securedBy: jwt 
+    queryParameters:
+      page:
+        description: Specify the page that you want to retrieve
+        type:        integer
+        required:    true
+        example:     1
+      per_page:
+        description: Specify the amount of items that will be retrieved per page
+        type:        integer
+        minimum:     10
+        maximum:     200
+        default:     30
+        example:     50
+    responses:
+      200:
+        body:
+          application/json:
+            type: Sleep[]
+      400:
+        body:
+          application/json:
+            properties:
+              errors:
+                type: array
+  post:
+    displayName: sleep.create
+    description: Create a new sleep resource
+    securedBy: jwt 
+    body:
+      application/json:
+        properties: # Don't need the other properties because JWT tells us
+          start_datetime:
+            type: datetime
+            required: true
+          end_datetime:
+            type: datetime
+            required: true
+          quality:
+            type: integer
+            required: false
+            minimum: 0
+            maximum: 10
+          notes:
+            type: string
+            required: false
+    responses:
+      200:
+        body:
+          application/json:
+            type: Sleep
+      400:
+        body:
+          application/json:
+            properties:
+              errors:
+                type: array
+  /{_id}:
+    get:
+        displayName: sleep.read
+        description: Get sleep with _id
+        securedBy: jwt
+        responses:
+          200:
+            body:
+              application/json:
+                type: Sleep
+          400:
+            body:
+              application/json:
+                properties:
+                  errors:
+                    type: array
+    patch:
+        displayName: sleep.update
+        description: Update sleep with _id
+        securedBy: jwt
+        responses:
+          202:
+          400:
+            body:
+              application/json:
+                properties:
+                  errors:
+                    type: array
+    delete:
+        displayName: sleep.delete
+        description: Delete sleep with _id
+        securedBy: jwt
+        responses:
+          202:
+          400:
+            body:
+              application/json:
+                properties:
+                  errors:
+                    type: array
+
+/mindfulness:
+  get:
+    displayName: mindfulness.list
+    description: Create a new mindfulness resource
+    securedBy: jwt
+    queryParameters:
+      page:
+        description: Specify the page that you want to retrieve
+        type:        integer
+        required:    true
+        example:     1
+      per_page:
+        description: Specify the amount of items that will be retrieved per page
+        type:        integer
+        minimum:     10
+        maximum:     200
+        default:     30
+        example:     50
+    responses:
+      200:
+        body:
+          application/json:
+            type: Mindfulness[]
+      400:
+        body:
+          application/json:
+            properties:
+              errors:
+                type: array
+  post:
+    displayName: mindfulness.create
+    description: Create a new mindfulness resource
+    securedBy: jwt 
+    body:
+      application/json:
+        properties: # Don't need the other properties because JWT tells us
+          start_datetime:
+            type: datetime
+            required: true
+          end_datetime:
+            type: datetime
+            required: true
+          notes:
+            type: string
+            required: false
+    responses:
+      200:
+        body:
+          application/json:
+            type: Mindfulness
+      400:
+        body:
+          application/json:
+            properties:
+              errors:
+                type: array
+  /{_id}:
+    get:
+        displayName: mindfulness.read
+        description: Get mindfulness with _id
+        securedBy: jwt
+        queryParameters:
+          fields:
+            description: Specify the fields that you want to retrieve
+            type:        string
+            required:    false
+            example:     start_datetime, end_datetime
+        responses:
+          200:
+            body:
+              application/json:
+                type: Mindfulness
+          400:
+            body:
+              application/json:
+                properties:
+                  errors:
+                    type: array
+    patch:
+        displayName: mindfulness.update
+        description: Update mindfulness with _id
+        securedBy: jwt
+        responses:
+          202:
+          400:
+            body:
+              application/json:
+                properties:
+                  errors:
+                    type: array
+    delete:
+        displayName: mindfulness.delete
+        description: Delete mindfulness with _id
+        securedBy: jwt
+        responses:
+          202:
+          400:
+            body:
+              application/json:
+                properties:
+                  errors:
+                    type: array

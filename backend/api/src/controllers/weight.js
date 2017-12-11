@@ -2,11 +2,13 @@
 'use strict';
 // Import NPM Modules
 const shortid = require('shortid');
+const _difference = require('lodash/difference');
 const db = require('../models');
 const log = require('../../../../libs/logger');
 
 const controller = {};
 const _name:string = 'weight';
+const _fields:Array<string> = [];
 
 const _convert = function(v:number):number {
   return v;
@@ -62,12 +64,26 @@ controller.list = (req: Object, res: Object, next: Function) => {
 };
 // TODO
 controller.read = (req: Object, res: Object, next: Function) => {
-  // Find in DB
-  db[_name].findOne({
+  let query:Object = {
     where: {
       _id: req._id,
     },
-  })
+  };
+  let fields:?Array<string> = req.query.fields.toLowerCase().split(',') || null;
+  if (fields) {
+    let difference = _difference(fields, _fields);
+    if (difference.length > 0) {
+      return res.build().error({
+        type: 'ResourceFieldsError',
+        dataPath: `${_name}.read`,
+        message: 'Invalid field values',
+        values: difference,
+      }).resolve(400);
+    }
+    query.attributes = fields;
+  }
+  // Find in DB
+  db[_name].findOne(query)
   .then((result) => {
     return res.build().data(result.dataValues).resolve();
   })

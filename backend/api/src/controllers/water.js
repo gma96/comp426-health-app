@@ -2,11 +2,16 @@
 'use strict';
 // Import NPM Modules
 const shortid = require('shortid');
+// Custom Modules
 const db = require('../models');
 const log = require('../../../../libs/logger');
+const processes = require('../lib/req-processors');
 
 const controller = {};
 const _name:string = 'water';
+const _fields:Array<string> = [
+  '_id', 'user_id', 'date', 'value', 'createdAt', 'updatedAt',
+];
 
 const _convert = function(v:number):number {
   return v;
@@ -62,22 +67,30 @@ controller.list = (req: Object, res: Object, next: Function) => {
 };
 // TODO
 controller.read = (req: Object, res: Object, next: Function) => {
-  // Find in DB
-  db[_name].findOne({
+  let query:Object = {
     where: {
       _id: req._id,
     },
-  })
-  .then((result) => {
-    return res.build().data(result.dataValues).resolve();
+  };
+  processes.fields(`${_name}.read`, _fields, req.query.fields)
+  .then((fields) => {
+    if (fields) query.fields = fields;
+    // Find in DB
+    db[_name].findOne(query)
+    .then((result) => {
+      return res.build().data(result.dataValues).resolve();
+    })
+    .catch((e) => {
+      log.error(e);
+      return res.build().error({
+        type: 'ResourceReadError',
+        dataPath: `${_name}.read`,
+        message: e.message || 'An error occured :(',
+      }).resolve(400);
+    });
   })
   .catch((e) => {
-    log.error(e);
-    return res.build().error({
-      type: 'ResourceReadError',
-      dataPath: `${_name}.read`,
-      message: e.message || 'An error occured :(',
-    }).resolve(400);
+    return res.build().error(e).resolve(400);
   });
 };
 // TODO
