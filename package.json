@@ -8,14 +8,14 @@
     "start": "node ./dist/server.js",
     "mocha": "mocha --requires js:babel-core/register",
     "build": "babel src/ --out-dir dist/ ",
-    "dev": "nodemon --watch src --exec \"npm run build && npm start\"",
+    "dev": "nodemon --watch src --exec 'npm run build && npm start'",
     "app-build": "babel ./frontend/src/ --out-dir ./frontend/dist/",
     "server-build": "rimraf ./backend/api/dist/ && babel ./backend/api/src/ --out-dir ./backend/api/dist/",
     "server-start": "node ./backend/api/dist/server.js",
-    "server": "nodemon --watch ./backend/api/src/ --exec \"npm run server-build && npm run server-start\"",
+    "server": "nodemon --watch ./backend/api/src/ --exec 'npm run server-build && npm run server-start'",
     "mock-server-build": "babel ./backend/mock/src/ --out-dir ./backend/mock/dist/",
     "mock-server-start": "node ./backend/mock/dist/server.js",
-    "mock-server": "nodemon --watch ./backend/mock/src/ --exec \"npm run mock-server-build && npm run mock-server-start\""
+    "mock-server": "nodemon --watch ./backend/mock/src/ --exec 'npm run mock-server-build && npm run mock-server-start'"
   },
   "repository": {
     "type": "git",
