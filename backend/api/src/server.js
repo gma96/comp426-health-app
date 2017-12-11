@@ -4,6 +4,7 @@ const join = require('path').join;
 const cookieParser = require('cookie-parser'); // Don't think we're going to use
 const jwt = require('./lib/jwt-manager');
 const middleware426 = require('./lib/res-middleware');
+const RequestError = require('./exceptions/request');
 // Loggers
 const morgan = require('morgan');
 const log = require('../../../libs/logger');
@@ -90,7 +91,10 @@ osprey.loadFile(apiDir, authHandler).then((middleware) => {
   require(`${__dirname}/routes`)(router);
 
   app.use((err, req, res, next) => {
-    log.error(err);
+    // log.error(err);
+    if (err.type == 'RequestError') {
+      return res.status(err.code).json(err);
+    }
     if (err && err.ramlAuthorization == true) {
       return res.status(401).json(err);
     }

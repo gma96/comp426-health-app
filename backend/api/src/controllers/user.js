@@ -8,6 +8,9 @@ const {LOGIN_ERROR} = require('../config/lang/user-enUs'); // Language File
 const jwt = require('../lib/jwt-manager');
 const db = require('../models');
 const log = require('../../../../libs/logger');
+const RequestError = require('../exceptions/request');
+const FailedDeleteError = require('../exceptions/failed-delete');
+const ResourceExistsError = require('../exceptions/exists');
 // Unit options map
 const userUnitObj = {
   imperial: 'imperial',
@@ -58,8 +61,11 @@ userController.create = (req: Object, res: Object, next: Function) => {
       });
     });
     } else {
-      return res.status(400).json({errors: [{type: 'exists', dataPath: 'email',
-      message: 'Email already in use'}]});
+      // return res.status(400).json({errors: [{type: 'exists', dataPath: 'email',
+      // message: 'Email already in use'}]});
+      return next(new RequestError(400, [
+        new ResourceExistsError('email', 'Email already in use'),
+      ]));
     }
   });
 };
@@ -128,13 +134,16 @@ userController.delete = (req: Object, res: Object, next: Function) => {
         message: `Deleted user with _id = ${req.token._id}`,
       });
     }
-    return res.bad().error('FailedDelete', 'user.delete',
-            `User with _id = ${req.token._id} not found`).resolve(404);
+    return next(new RequestError(404, [
+      new FailedDeleteError('user.delete',
+        `User with _id = ${req.token._id} not found`),
+    ]));
   })
   .catch((e) => {
     log.error(e);
-    return res.bad().error('FailedDelete', 'user.delete', e.message)
-            .resolve(400);
+    return next(new RequestError(400, [
+      new FailedDeleteError('user.delete', e.message),
+    ]));
   });
 };
 
