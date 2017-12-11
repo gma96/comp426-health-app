@@ -25,7 +25,7 @@ controller.create = (req: Object, res: Object, next: Function) => {
   }
 
   // Insert into DB
-  db.[_name].create(resource)
+  db[_name].create(resource)
     .then((result) => {
       return res.build().data({
         _id: resource._id,
@@ -43,7 +43,7 @@ controller.create = (req: Object, res: Object, next: Function) => {
 // TODO
 controller.list = (req: Object, res: Object, next: Function) => {
   // Find in DB
-  db.[_name].findAll({
+  db[_name].findAll({
     where: {
       user_id: req.token._id,
     },
@@ -63,7 +63,7 @@ controller.list = (req: Object, res: Object, next: Function) => {
 // TODO
 controller.read = (req: Object, res: Object, next: Function) => {
   // Find in DB
-  db.[_name].findOne({
+  db[_name].findOne({
     where: {
       _id: req._id,
     },
@@ -100,7 +100,7 @@ controller.update = (req: Object, res: Object, next: Function) => {
   }
 
   // Find in DB
-  db.[_name].update(values, options)
+  db[_name].update(values, options)
   .then((result) => {
     return res.build().data(result.dataValues).resolve();
   })
@@ -116,7 +116,7 @@ controller.update = (req: Object, res: Object, next: Function) => {
 // TODO
 controller.delete = (req: Object, res: Object, next: Function) => {
   // Find in DB and destroy
-  db.[_name].destroy({
+  db[_name].destroy({
     where: {
       _id: req._id,
     },

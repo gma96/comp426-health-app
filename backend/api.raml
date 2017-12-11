@@ -136,6 +136,24 @@ securitySchemes:
         body:
           application/json:
             type: User
+  /verify:
+    post:
+      displayName: user.verify
+      description: Check authenticity of user's token
+      responses:
+        204:
+        401:
+
+  /renew:
+    post:
+      displayName: user.renew
+      description: Renew user's token
+      responses:
+        200:
+        401:
+          body:
+            application/json:
+
   /login:
     post:
       displayName: user.login
