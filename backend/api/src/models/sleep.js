@@ -6,6 +6,11 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
     },
     user_id: DataTypes.STRING(14),
+    start_datetime: DataTypes.DATE,
+    end_datetime: DataTypes.DATE,
+    minutes: DataTypes.INTEGER,
+    quality: DataTypes.INTEGER,
+    notes: DataTypes.STRING(255),
   }, {
     freezeTableName: true,
   });

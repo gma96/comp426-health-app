@@ -13,7 +13,7 @@ const ResourceReadError = require('../exceptions/read');
 const ResourceUpdateError = require('../exceptions/update');
 const ResourceDeleteError = require('../exceptions/delete');
 const ResourceFieldError = require('../exceptions/resource-field');
-//const ResourceListError = require('../exceptions/list');
+const ResourceListError = require('../exceptions/list');
 /**
  * creates Generic Controller
  * @return {Controller}
