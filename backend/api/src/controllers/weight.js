@@ -1,156 +1,93 @@
 // @flow
 'use strict';
 // Import NPM Modules
-const shortid = require('shortid');
-const _difference = require('lodash/difference');
+const convert = require('convert-units');
+// Custom Modules
 const db = require('../models');
-const log = require('../../../../libs/logger');
+
+const _round = function(value, decimals) {
+  return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+};
 
 const controller = {};
 const _name:string = 'weight';
-const _fields:Array<string> = [];
+const _fields:Array<string> = [
+  '_id', 'user_id', 'entry_date', 'value', 'createdAt', 'updatedAt',
+];
 
-// TODO
-controller.create = (req: Object, res: Object, next: Function) => {
-  // Osprey will take care of validating for us
-  let resource = {
-    _id: shortid(),
-  };
+const Controller = require('../controllers/controller-generic');
+const WeightController = new Controller(_name, db[_name], _fields);
 
-  if (req.token.unit == 'imperial') {
-    // TODO conversion logic
-    // _convert(values.value);
-  }
-
-  // Insert into DB
-  db[_name].create(resource)
-    .then((result) => {
-      return res.build().data({
-        _id: resource._id,
-      }).resolve(201);
-    })
-    .catch((e) => {
-      log.error(e);
-      return res.build().error({
-        type: 'ResourceCreateError',
-        dataPath: `${_name}.create`,
-        message: e.message || 'An error occured :(',
-      }).resolve(400);
+// CRUD Operations
+// Create Resource
+controller.create = WeightController.create({
+  uniqueQuery: function(req) {
+    return {
+      where: {
+        entry_date: req.body.entry_date,
+      },
+    };
+  },
+  resourceBuilder: function(req) {
+    return new Promise((resolve, reject) => {
+      let resource = {};
+      resource.value = req.body.value;
+      if (req.token.unit == 'imperial') {
+        resource.value = _round(convert(resource.value).from('lb')
+                          .to('kg'), 3);
+      }
+      resource.user_id = req.token._id;
+      resource.entry_date = req.body.entry_date;
+      return resolve(resource);
     });
-};
-// TODO
-controller.list = (req: Object, res: Object, next: Function) => {
-  // Find in DB
-  db[_name].findAll({
-    where: {
-      user_id: req.token._id,
-    },
-  })
-  .then((result) => {
-    return res.build().data(result.dataValues).resolve();
-  })
-  .catch((e) => {
-    log.error(e);
-    return res.build().error({
-      type: 'ResourceListError',
-      dataPath: `${_name}.list`,
-      message: e.message || 'An error occured :(',
-    }).resolve(400);
-  });
-};
-// TODO
-controller.read = (req: Object, res: Object, next: Function) => {
-  let query:Object = {
-    where: {
-      _id: req._id,
-    },
-  };
-  let fields:?Array<string> = req.query.fields.toLowerCase().split(',') || null;
-  if (fields) {
-    let difference = _difference(fields, _fields);
-    if (difference.length > 0) {
-      return res.build().error({
-        type: 'ResourceFieldsError',
-        dataPath: `${_name}.read`,
-        message: 'Invalid field values',
-        values: difference,
-      }).resolve(400);
+  },
+});
+
+// Read Resource
+controller.read = WeightController.read(function(req, resource) {
+  if (req.token.unit == 'imperial' && resource.value) {
+    resource.value = _round(convert(resource.value).from('kg').to('lb'), 0);
+  }
+  return resource;
+});
+
+// Update Resource
+controller.update = WeightController.update(function(req, resource) {
+  if (req.token.unit == 'imperial' && resource.value) {
+    resource.value = _round(convert(resource.value).from('lb')
+                        .to('kg'), 3);
+  }
+  return resource;
+});
+
+// Delete Resource
+controller.delete = WeightController.delete();
+
+// Collections Operations
+controller.list = WeightController.list({
+  queryBuilder: function(req, query) {
+    query = Object.assign({}, query);
+    if (req.query.date_start || req.query.date_end) {
+      query.where.entry_date = {};
+      if (req.query.date_start) {
+        query.where.entry_date['gte'] = req.query.date_start;
+      }
+      if (req.query.date_end) {
+        query.where.entry_date['lte'] = req.query.date_end;
+      }
     }
-    query.attributes = fields;
-  }
-  // Find in DB
-  db[_name].findOne(query)
-  .then((result) => {
-    return res.build().data(result.dataValues).resolve();
-  })
-  .catch((e) => {
-    log.error(e);
-    return res.build().error({
-      type: 'ResourceReadError',
-      dataPath: `${_name}.read`,
-      message: e.message || 'An error occured :(',
-    }).resolve(400);
-  });
-};
-// TODO
-controller.update = (req: Object, res: Object, next: Function) => {
-  // Values to change
-  let values = Object.assign({}, req.body);
-  if (values._id) delete values._id;
-  if (values.user_id) delete values.user_id;
-
-  let options = {
-    where: {
-      _id: req._id,
-    },
-    fields: Object.keys(values), // Fields to update (defaults to all)
-  };
-
-  if (req.token.unit == 'imperial') {
-    // TODO conversion logic
-    // _convert(values.value);
-  }
-
-  // Find in DB
-  db[_name].update(values, options)
-  .then((result) => {
-    return res.build().data(result.dataValues).resolve();
-  })
-  .catch((e) => {
-    log.error(e);
-    return res.build().error({
-      type: 'ResourceUpdateError',
-      dataPath: `${_name}.update`,
-      message: e.message || 'An error occured :(',
-    }).resolve(400);
-  });
-};
-// TODO
-controller.delete = (req: Object, res: Object, next: Function) => {
-  // Find in DB and destroy
-  db[_name].destroy({
-    where: {
-      _id: req._id,
-    },
-  })
-  .then((deleted) => {
-    if (deleted[0] === 1) {
-      return res.status(202).json({
-        message: `Deleted resource with _id = ${req.token._id}`,
+    return query;
+  },
+  resourceBuilder: function(req, resources) {
+    if (req.token.unit == 'imperial' && resources[0].value) {
+      resources = resources.map((resource) => {
+        resource.value = _round(convert(resource.value).from('kg')
+                          .to('lb'), 0);
+        return resource;
       });
     }
-    return res.bad().error('ResourceDeleteError', `${_name}.delete`,
-            `Resource with _id = ${req.token._id} not found`).resolve(404);
-  })
-  .catch((e) => {
-    log.error(e);
-    return res.build().error({
-      type: 'ResourceDeleteError',
-      dataPath: `${_name}.delete`,
-      message: e.message || 'An error occured :(',
-    }).resolve(400);
-  });
-};
-
+    return resources;
+  },
+});
 // Export our controller
 module.exports = controller;

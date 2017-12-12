@@ -13,6 +13,7 @@ const ResourceReadError = require('../exceptions/read');
 const ResourceUpdateError = require('../exceptions/update');
 const ResourceDeleteError = require('../exceptions/delete');
 const ResourceFieldError = require('../exceptions/resource-field');
+const ResourceListError = require('../exceptions/list');
 /**
  * creates Generic Controller
  * @return {Controller}
@@ -45,36 +46,68 @@ Controller.prototype.buildResource = function(source, fields, funcs={}) {
   });
 };
 
+Controller.prototype.isUnique = function(query) {
+  if (!query) return true;
+    return this._orm.count(query)
+      .then((count) => {
+        if (count != 0) {
+          return false;
+        }
+        return true;
+    });
+};
+
 // Standard CRUD
-Controller.prototype.create = function(resourceBuilder) {
+Controller.prototype.create = function(o={}) {
+  // Probably should make these functions async
+  let {uniqueQuery=null, resourceBuilder} = o;
   return (req: Object, res: Object, next: Function) => {
     // Osprey will take care of validating for us
     let resource = {
       _id: shortid(),
     };
 
-    resourceBuilder(req)
-      .then((builtResource) => {
-        // Create Resource
-        resource = Object.assign(resource, builtResource);
-        // Insert into DB
-        this._orm.create(resource)
-          .then((result) => {
-            return res.build().data({
-              _id: resource._id,
-            }).resolve(201);
-          })
-          .catch((e) => {
-            return next(new RequestError(400, [
-              new ResourceCreateError(`${this._name}.create`,
-                e.message || 'An error occured :('
-              ),
-            ]));
-          });
+    let create = () => {
+      resourceBuilder(req)
+        .then((builtResource) => {
+          // Create Resource
+          resource = Object.assign(resource, builtResource);
+          // Insert into DB
+          this._orm.create(resource)
+            .then((result) => {
+              return res.build().data({
+                _id: resource._id,
+              }).resolve(201);
+            })
+            .catch((e) => {
+              return next(new RequestError(400, [
+                new ResourceCreateError(`${this._name}.create`,
+                  e.message || 'An error occured :('
+                ),
+              ]));
+            });
+        })
+        .catch((e) => {
+          return next(new RequestError(400, [
+            new ResourceCreateError(`${this._name}.create`,
+              e.message || 'An error occured building the resource :('
+            ),
+          ]));
+        });
+    };
+    // Check for Unique
+    if (uniqueQuery) {
+      this.isUnique(uniqueQuery(req))
+      .then((bool) => {
+        if (bool) return create();
+        return next(new RequestError(400, [
+          new ResourceExistsError(this._name, 'Resource exists'),
+        ]));
       })
       .catch((e) => {
         e;
       });
+    } else create();
   };
 };
 
@@ -209,6 +242,94 @@ Controller.prototype.delete = function() {
 };
 
 
-// Collections functions
+// Collection Operations
+Controller.prototype.list = function(o={}) {
+  // Probably should make these functions async
+  let {queryBuilder=null, resourceBuilder=null} = o;
+  return (req: Object, res: Object, next: Function) => {
+    let query:Object = {
+      where: {
+        user_id: req.token._id,
+      },
+    };
+    if (queryBuilder) {
+      query = Object.assign({}, queryBuilder(req, query));
+    }
+    processes.fields(`${this._name}.list`, this._fields, req.query.fields)
+    .then((fields) => {
+      let pagingQuery = Object.assign({}, query);
+      if (fields) pagingQuery.attributes = fields;
+      // Find in DB
+      this._orm.count(query)
+      .then((count) => {
+        if (count) {
+          // Paging
+          let limit = Math.abs(req.query.per_page) || 30;
+          let page = Math.abs(req.query.page) || 1;
+          let pages = Math.ceil(count / limit);
+          let offset = limit * (page - 1);
+
+          if (page > pages) {
+            return next(new RequestError(400, [
+              new ResourceListError(
+                `${this._name}.list`, `Page ${page} out of range, MAX ${pages}`
+              )]));
+          }
+
+          // Sorting
+          let sortField = req.query.sort || 'entry_date';
+          let sortDirection = req.query.sort_direction || 'DESC';
+
+          // Build Paging Query
+          pagingQuery.limit = limit;
+          pagingQuery.offset = offset;
+          pagingQuery.order = [[sortField, sortDirection.toUpperCase()]];
+
+          // Execute Query
+          this._orm.findAll(pagingQuery)
+            .then((result) => {
+              let resObject = {
+                type: this._name,
+                count: count,
+                pages: pages,
+              };
+
+              // Check for resource builder
+              if (resourceBuilder) {
+                let entries = resourceBuilder(req, result);
+                return res.json(Object.assign({}, resObject, {data: entries}));
+              }
+
+              // Return Data if no resourceBuilder Function
+              return res.json(Object.assign({}, resObject,
+                              {data: result}));
+            })
+            .catch((e) => {
+              return next(new RequestError(400, [
+                new ResourceListError(
+                  `${this._name}.list`, e.message || 'An error occured :('
+                )]));
+            });
+        } else {
+          return next(new RequestError(404, [
+            new ResourceListError(
+              `${this._name}.list`, 'No resources found'
+            ),
+          ]));
+        }
+      })
+      .catch((e) => {
+        return next(new RequestError(400, [
+          new ResourceListError(
+            `${this._name}.list`, e.message || 'An error occured :('
+          ),
+        ]));
+      });
+    })
+    .catch((e) => {
+      return next(e);
+    });
+  };
+};
 
 module.exports = Controller;
