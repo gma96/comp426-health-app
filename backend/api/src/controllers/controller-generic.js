@@ -46,36 +46,68 @@ Controller.prototype.buildResource = function(source, fields, funcs={}) {
   });
 };
 
+Controller.prototype.isUnique = function(query) {
+  if (!query) return true;
+    return this._orm.count(query)
+      .then((count) => {
+        if (count != 0) {
+          return false;
+        }
+        return true;
+    });
+};
+
 // Standard CRUD
-Controller.prototype.create = function(resourceBuilder) {
+Controller.prototype.create = function(o={}) {
+  // Probably should make these functions async
+  let {uniqueQuery=null, resourceBuilder} = o;
   return (req: Object, res: Object, next: Function) => {
     // Osprey will take care of validating for us
     let resource = {
       _id: shortid(),
     };
 
-    resourceBuilder(req)
-      .then((builtResource) => {
-        // Create Resource
-        resource = Object.assign(resource, builtResource);
-        // Insert into DB
-        this._orm.create(resource)
-          .then((result) => {
-            return res.build().data({
-              _id: resource._id,
-            }).resolve(201);
-          })
-          .catch((e) => {
-            return next(new RequestError(400, [
-              new ResourceCreateError(`${this._name}.create`,
-                e.message || 'An error occured :('
-              ),
-            ]));
-          });
+    let create = () => {
+      resourceBuilder(req)
+        .then((builtResource) => {
+          // Create Resource
+          resource = Object.assign(resource, builtResource);
+          // Insert into DB
+          this._orm.create(resource)
+            .then((result) => {
+              return res.build().data({
+                _id: resource._id,
+              }).resolve(201);
+            })
+            .catch((e) => {
+              return next(new RequestError(400, [
+                new ResourceCreateError(`${this._name}.create`,
+                  e.message || 'An error occured :('
+                ),
+              ]));
+            });
+        })
+        .catch((e) => {
+          return next(new RequestError(400, [
+            new ResourceCreateError(`${this._name}.create`,
+              e.message || 'An error occured building the resource :('
+            ),
+          ]));
+        });
+    };
+    // Check for Unique
+    if (uniqueQuery) {
+      this.isUnique(uniqueQuery(req))
+      .then((bool) => {
+        if (bool) return create();
+        return next(new RequestError(400, [
+          new ResourceExistsError(this._name, 'Resource exists'),
+        ]));
       })
       .catch((e) => {
         e;
       });
+    } else create();
   };
 };
 

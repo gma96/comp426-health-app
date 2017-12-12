@@ -20,18 +20,27 @@ const WaterController = new Controller(_name, db.water, _fields);
 
 // CRUD Operations
 // Create Resource
-controller.create = WaterController.create(function(req) {
-  return new Promise((resolve, reject) => {
-    let resource = {};
-    resource.value = req.body.value;
-    if (req.token.unit == 'imperial') {
-      resource.value = _round(convert(resource.value).from('fl-oz')
-                        .to('ml'), 3);
-    }
-    resource.user_id = req.token._id;
-    resource.entry_date = req.body.entry_date;
-    return resolve(resource);
-  });
+controller.create = WaterController.create({
+  uniqueQuery: function(req) {
+    return {
+      where: {
+        entry_date: req.body.entry_date,
+      },
+    };
+  },
+  resourceBuilder: function(req) {
+    return new Promise((resolve, reject) => {
+      let resource = {};
+      resource.value = req.body.value;
+      if (req.token.unit == 'imperial') {
+        resource.value = _round(convert(resource.value).from('fl-oz')
+                          .to('ml'), 3);
+      }
+      resource.user_id = req.token._id;
+      resource.entry_date = req.body.entry_date;
+      return resolve(resource);
+    });
+  },
 });
 
 // Read Resource
