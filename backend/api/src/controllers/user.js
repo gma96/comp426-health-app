@@ -18,6 +18,14 @@ const userUnitObj = {
   imperial: 'imperial',
   metric: 'metric',
 };
+// Token Cookie Info
+const TOKEN_AGE = 60 * 30;
+const TOKEN_NAME = 'token';
+const TOKEN_SETTINGS = {
+  // secure: true,
+  httpOnly: false,
+  maxAge: 1000 * TOKEN_AGE,
+};
 
 // Controller to export
 const userController = {};
@@ -53,11 +61,13 @@ userController.create = (req: Object, res: Object, next: Function) => {
         user.password = hash;
         db.user.create(user).then((result) => {
         delete user.password;
+        let token = jwt.issue(user, {expiresIn: TOKEN_AGE});
+        res.cookie(TOKEN_NAME, token, TOKEN_SETTINGS);
         return res.status(201).json({
           data: [{
             resource: 'user',
             _id: user._id,
-            token: jwt.issue(user),
+            token: token,
           }],
         });
       });
@@ -84,39 +94,6 @@ userController.read = (req: Object, res: Object, next: Function) => {
         new ResourceReadError('user.profile', e.message),
       ]));
     });
-};
-
-// Login Function
-userController.login = (req: Object, res: Object, next: Function) => {
-  let _reject = (message) => {
-    return next(new RequestError(401, [
-      new LoginFailedError('user.login', message),
-    ]));
-  };
-  db.user.findOne({
-    where: {
-      email: req.body.email,
-    },
-    attributes: ['_id', 'email', 'unit', 'password'],
-  }).then((user) => {
-    bcrypt.compare(req.body.password, user.password, (e, valid: Boolean) => {
-      // Check for error
-      if (e) log.error(e);
-      // Remove password hash from return token
-      user = user.dataValues;
-      delete user.password;
-      // valid == true
-      if (valid) {
-        return res.build().data({
-          _id: user._id,
-          token: jwt.issue(user),
-        }).resolve(200);
-      }
-      _reject(LOGIN_ERROR);
-    });
-  }).catch((e) => {
-    _reject(LOGIN_ERROR);
-  });
 };
 
 // Cascade delete
@@ -147,6 +124,69 @@ userController.delete = (req: Object, res: Object, next: Function) => {
       new FailedDeleteError('user.delete', e.message),
     ]));
   });
+};
+
+/********************
+ * Token Operations *
+ ********************/
+ // Login Function
+userController.login = (req: Object, res: Object, next: Function) => {
+  let _reject = (message) => {
+    return next(new RequestError(401, [
+      new LoginFailedError('user.login', message),
+    ]));
+  };
+  db.user.findOne({
+    where: {
+      email: req.body.email,
+    },
+    attributes: ['_id', 'email', 'unit', 'password'],
+  }).then((user) => {
+    bcrypt.compare(req.body.password, user.password, (e, valid: Boolean) => {
+      // Check for error
+      if (e) log.error(e);
+      // Remove password hash from return token
+      user = user.dataValues;
+      delete user.password;
+      // valid == true
+      if (valid) {
+        let token = jwt.issue(user, {expiresIn: TOKEN_AGE});
+        res.cookie(TOKEN_NAME, token, TOKEN_SETTINGS);
+        return res.build().data({
+          _id: user._id,
+          token: token,
+        }).resolve(200);
+      }
+      _reject(LOGIN_ERROR);
+    });
+  }).catch((e) => {
+    _reject(LOGIN_ERROR);
+  });
+};
+
+userController.renew = (req: Object, res: Object, next: Function) => {
+  jwt.refreshPreVer(req.token, {}, {expiresIn: TOKEN_AGE})
+    .then((refreshed) => {
+      res.cookie(TOKEN_NAME, refreshed, TOKEN_SETTINGS);
+      res.json({
+        _id: req.token._id,
+        token: refreshed,
+      });
+    })
+    .catch((e) => {
+      return next(new RequestError(400, [e]));
+    });
+};
+
+userController.verify = (req: Object, res: Object, next: Function) => {
+  // Already verified if they made it this far
+  res.sendStatus(204);
+};
+
+userController.logout = (req: Object, res: Object, next: Function) => {
+  // Already verified if they made it this far
+  res.clearCookie(TOKEN_NAME);
+  res.sendStatus(204);
 };
 
 module.exports = userController;

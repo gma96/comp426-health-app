@@ -49,6 +49,15 @@ const JWTManager = (() => {
     });
   };
 
+  const refreshPreVer = (payload, newPayload={}, opts={}, verification={}) => {
+    return new Promise((resolve, reject) => {
+      if (!payload) reject({name: 'JsonWebToken', message: 'Payload Required'});
+      payload = _scrubPayload(payload);
+      // Sign a new token for the request
+      resolve(issue(Object.assign(payload, newPayload), opts, verification));
+    });
+  };
+
   const revoke = (token) => {
     return new Promise((resolve, reject) => {
       verify(token).then((decoded) => {
@@ -75,6 +84,7 @@ const JWTManager = (() => {
     revoke,
     verify,
     refresh,
+    refreshPreVer,
   };
 })();
 

@@ -7,4 +7,10 @@ module.exports = (router) => {
   router.route('/users/me')
     .get(userController.read)
     .delete(userController.delete);
+  router.route('/users/me/renew')
+    .post(userController.renew);
+  router.route('/users/me/verify')
+    .post(userController.verify);
+  router.route('/users/me/logout')
+    .post(userController.logout);
 };
