@@ -10,6 +10,7 @@ CREATE TABLE user (
 	password VARCHAR(300) NOT NULL,
 	height FLOAT UNSIGNED,
 	unit ENUM('imperial', 'metric') NOT NULL DEFAULT 'imperial',
+	UNIQUE (email),
 	PRIMARY KEY (_id)
 );
 /**
