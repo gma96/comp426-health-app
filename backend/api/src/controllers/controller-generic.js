@@ -211,13 +211,18 @@ Controller.prototype.delete = function() {
 
 
 // Collection Operations
-Controller.prototype.list = function(resourceBuilder=null) {
+Controller.prototype.list = function(o={}) {
+  // Probably should make these functions async
+  let {queryBuilder=null, resourceBuilder=null} = o;
   return (req: Object, res: Object, next: Function) => {
     let query:Object = {
       where: {
         user_id: req.token._id,
       },
     };
+    if (queryBuilder) {
+      query = Object.assign({}, queryBuilder(req, query));
+    }
     processes.fields(`${this._name}.list`, this._fields, req.query.fields)
     .then((fields) => {
       let pagingQuery = Object.assign({}, query);

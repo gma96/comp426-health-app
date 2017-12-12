@@ -281,7 +281,7 @@ securitySchemes:
     securedBy: jwt 
     body:
       properties: # Don't need the other properties because JWT tells us
-        date:
+        entry_date:
           type: date-only # auto or set
           required: true
         value:
@@ -379,6 +379,12 @@ securitySchemes:
         type:        string
         required:    false
         example:     entry_date
+      date_start:
+        type: date-only
+        required: false
+      date_end:
+        type: date-only
+        required: false
     responses:
       200:
         body:

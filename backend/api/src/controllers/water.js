@@ -55,15 +55,30 @@ controller.update = WaterController.update(function(req, resource) {
 controller.delete = WaterController.delete();
 
 // Collections Operations
-controller.list = WaterController.list(function(req, resources) {
-  if (req.token.unit == 'imperial' && resources[0].value) {
-    resources = resources.map((resource) => {
-      resource.value = _round(convert(resource.value).from('ml')
-                        .to('fl-oz'), 0);
-      return resource;
-    });
-  }
-  return resources;
+controller.list = WaterController.list({
+  queryBuilder: function(req, query) {
+    query = Object.assign({}, query);
+    if (req.query.date_start || req.query.date_end) {
+      query.where.entry_date = {};
+      if (req.query.date_start) {
+        query.where.entry_date['gte'] = req.query.date_start;
+      }
+      if (req.query.date_end) {
+        query.where.entry_date['lte'] = req.query.date_end;
+      }
+    }
+    return query;
+  },
+  resourceBuilder: function(req, resources) {
+    if (req.token.unit == 'imperial' && resources[0].value) {
+      resources = resources.map((resource) => {
+        resource.value = _round(convert(resource.value).from('ml')
+                          .to('fl-oz'), 0);
+        return resource;
+      });
+    }
+    return resources;
+  },
 });
 // Export our controller
 module.exports = controller;
