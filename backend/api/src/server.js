@@ -98,7 +98,7 @@ osprey.loadFile(apiDir, authHandler).then((middleware) => {
     res.json(req.decoded);
   });
 
-  // Require Rotes index.js
+  // Require Routes index.js
   require(`${__dirname}/routes`)(router);
 
   app.use((err, req, res, next) => {

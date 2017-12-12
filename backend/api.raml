@@ -558,6 +558,9 @@ securitySchemes:
               errors:
                 type: array
   /{_id}:
+    uriParameters:
+      id:
+        type: string
     get:
         displayName: sleep.read
         description: Get sleep with _id

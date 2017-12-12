@@ -1,19 +1,19 @@
 // @flow
 'use strict';
 // Import NPM Modules
-const shortid = require('shortid');
-const _difference = require('lodash/difference');
+//const shortid = require('shortid');
+//const _difference = require('lodash/difference');
 const db = require('../models');
-const log = require('../../../../libs/logger');
+//const log = require('../../../../libs/logger');
 
-const _convert = function(v:number):number {
-  return v;
-};
+// const _convert = function(v:number):number {
+//   return v;
+// };
 
 const controller = {};
 const _name:string = 'sleep';
 const _fields:Array<string> = [
-  '_id', 'user_id', 'start_datetime', 'end_datetime', 'minutes', 'quality', 'notes', 'createdAt', 'updatedAt',
+  '_id', 'user_id', 'start_datetime', 'end_datetime', 'quality', 'notes', 'createdAt', 'updatedAt',
 ];
 
 const Controller = require('../controllers/controller-generic');
@@ -22,20 +22,20 @@ const SleepController = new Controller(_name, db[_name], _fields);
 // CRUD Operations
 // Create Resource
 controller.create = SleepController.create({
-  uniqueQuery: function(req) {
-    return {
-      where: {
-        entry_date: req.body.entry_date,
-      },
-    };
-  },
+  // uniqueQuery: function(req) {
+  //   return {
+  //     where: {
+  //       entry_date: req.body.entry_date,
+  //     },
+  //   };
+  // },
   resourceBuilder: function(req) {
     return new Promise((resolve, reject) => {
       let resource = {};
       resource.user_id = req.token._id;
-      resource.start_datetime = req.body.start_datetime;
-      resource.end_datetime = req.body.end_datetime;
-      resource.minutes = 10; // required false
+      resource.start_datetime = new Date(req.body.start_datetime).toISOString().slice(0, 19).replace('T', ' ');
+      resource.end_datetime = new Date(req.body.end_datetime).toISOString().slice(0, 19).replace('T', ' ');
+     // resource.minutes = 10; // required false
       resource.quality = req.body.quality; // required false
       resource.notes = req.body.notes; // required false
       return resolve(resource);
@@ -50,10 +50,6 @@ controller.read = SleepController.read(function(req, resource) {
 
 // Update Resource
 controller.update = SleepController.update(function(req, resource) {
-  if (req.token.unit == 'imperial' && resource.value) {
-    resource.value = _round(convert(resource.value).from('lb')
-                        .to('kg'), 3);
-  }
   return resource;
 });
 

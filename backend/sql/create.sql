@@ -46,7 +46,6 @@ CREATE TABLE mindfulness (
 	user_id VARCHAR(14) NOT NULL,
 	start_datetime DATETIME NOT NULL,
 	end_datetime DATETIME NOT NULL,
-	minutes INT UNSIGNED,
 	action VARCHAR(255) NOT NULL,
 	notes VARCHAR(255) NOT NULL,
 	PRIMARY KEY (_id),
