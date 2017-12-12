@@ -13,13 +13,9 @@
     "app-build": "babel ./frontend/src/ --out-dir ./frontend/dist/",
     "server-build": "rimraf ./backend/api/dist/ && babel ./backend/api/src/ --out-dir ./backend/api/dist/",
     "server-start": "node ./backend/api/dist/server.js",
-<<<<<<< HEAD
     "server": "nodemon --watch ./backend/api/src/ --exec \"npm run server-build && npm run server-start\"",
-=======
-    "server": "nodemon --watch ./backend/api/src/ --exec 'npm run server-build && npm run server-start'",
     "server-start:profile": "node --prof ./backend/api/dist/server.js",
-    "server:profile": "nodemon --watch ./backend/api/src/ --exec 'npm run server-build && npm run server-start:profile'",
->>>>>>> e4b20b53b215f8a4d232e387073ca667fe086eb6
+    "server:profile": "nodemon --watch ./backend/api/src/ --exec \"npm run server-build && npm run server-start:profile\"",
     "mock-server-build": "babel ./backend/mock/src/ --out-dir ./backend/mock/dist/",
     "mock-server-start": "node ./backend/mock/dist/server.js",
     "mock-server": "nodemon --watch ./backend/mock/src/ --exec \"npm run mock-server-build && npm run mock-server-start\""
