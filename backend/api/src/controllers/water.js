@@ -2,48 +2,43 @@
 'use strict';
 // Import NPM Modules
 const shortid = require('shortid');
+const convert = require('convert-units');
+// Custom Modules
 const db = require('../models');
 const log = require('../../../../libs/logger');
 
+const _round = function(value, decimals) {
+  return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+};
+
 const controller = {};
 const _name:string = 'water';
+const _fields:Array<string> = [
+  '_id', 'user_id', 'date', 'value', 'createdAt', 'updatedAt',
+];
 
-const _convert = function(v:number):number {
-  return v;
-};
+const Controller = require('../controllers/controller-generic');
+const WaterController = new Controller(_name, db.water, _fields);
 
 // TODO
-controller.create = (req: Object, res: Object, next: Function) => {
-  // Osprey will take care of validating for us
-  let resource = {
-    _id: shortid(),
-  };
+controller.create = WaterController.create(function(req) {
+  return new Promise((resolve, reject) => {
+    let resource = {};
+    resource.value = req.body.value;
+    if (req.token.unit == 'imperial') {
+      resource.value = _round(convert(resource.value).from('fl-oz')
+                        .to('ml'), 3);
+    }
+    resource.user_id = req.token._id;
+    resource.entry_date = req.body.entry_date;
+    return resolve(resource);
+  });
+});
 
-  if (req.token.unit == 'imperial') {
-    // TODO conversion logic
-    // _convert(values.value);
-  }
-
-  // Insert into DB
-  db.[_name].create(resource)
-    .then((result) => {
-      return res.build().data({
-        _id: resource._id,
-      }).resolve(201);
-    })
-    .catch((e) => {
-      log.error(e);
-      return res.build().error({
-        type: 'ResourceCreateError',
-        dataPath: `${_name}.create`,
-        message: e.message || 'An error occured :(',
-      }).resolve(400);
-    });
-};
 // TODO
 controller.list = (req: Object, res: Object, next: Function) => {
   // Find in DB
-  db.[_name].findAll({
+  db[_name].findAll({
     where: {
       user_id: req.token._id,
     },
@@ -60,26 +55,14 @@ controller.list = (req: Object, res: Object, next: Function) => {
     }).resolve(400);
   });
 };
-// TODO
-controller.read = (req: Object, res: Object, next: Function) => {
-  // Find in DB
-  db.[_name].findOne({
-    where: {
-      _id: req._id,
-    },
-  })
-  .then((result) => {
-    return res.build().data(result.dataValues).resolve();
-  })
-  .catch((e) => {
-    log.error(e);
-    return res.build().error({
-      type: 'ResourceReadError',
-      dataPath: `${_name}.read`,
-      message: e.message || 'An error occured :(',
-    }).resolve(400);
-  });
-};
+
+controller.read = WaterController.read(function(req, resource) {
+  if (req.token.unit == 'imperial' && resource.value) {
+    resource.value = _round(convert(resource.value).from('ml').to('fl-oz'), 0);
+  }
+  return resource;
+});
+
 // TODO
 controller.update = (req: Object, res: Object, next: Function) => {
   // Values to change
@@ -100,7 +83,7 @@ controller.update = (req: Object, res: Object, next: Function) => {
   }
 
   // Find in DB
-  db.[_name].update(values, options)
+  db[_name].update(values, options)
   .then((result) => {
     return res.build().data(result.dataValues).resolve();
   })
@@ -116,7 +99,7 @@ controller.update = (req: Object, res: Object, next: Function) => {
 // TODO
 controller.delete = (req: Object, res: Object, next: Function) => {
   // Find in DB and destroy
-  db.[_name].destroy({
+  db[_name].destroy({
     where: {
       _id: req._id,
     },

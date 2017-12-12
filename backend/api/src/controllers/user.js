@@ -8,6 +8,11 @@ const {LOGIN_ERROR} = require('../config/lang/user-enUs'); // Language File
 const jwt = require('../lib/jwt-manager');
 const db = require('../models');
 const log = require('../../../../libs/logger');
+const RequestError = require('../exceptions/request');
+const FailedDeleteError = require('../exceptions/failed-delete');
+const ResourceExistsError = require('../exceptions/exists');
+const ResourceReadError = require('../exceptions/read');
+const LoginFailedError = require('../exceptions/user-login');
 // Unit options map
 const userUnitObj = {
   imperial: 'imperial',
@@ -58,8 +63,9 @@ userController.create = (req: Object, res: Object, next: Function) => {
       });
     });
     } else {
-      return res.status(400).json({errors: [{type: 'exists', dataPath: 'email',
-      message: 'Email already in use'}]});
+      return next(new RequestError(400, [
+        new ResourceExistsError('email', 'Email already in use'),
+      ]));
     }
   });
 };
@@ -74,15 +80,18 @@ userController.read = (req: Object, res: Object, next: Function) => {
       return res.build().data(user).resolve(200);
     })
     .catch((e) => {
-      return res.build().error('ReadError', 'user.profile', e.message)
-              .resolve(400);
+      return next(new RequestError(400, [
+        new ResourceReadError('user.profile', e.message),
+      ]));
     });
 };
 
 // Login Function
 userController.login = (req: Object, res: Object, next: Function) => {
   let _reject = (message) => {
-    return res.bad().error('LoginFailed', 'user.login', message).resolve(401);
+    return next(new RequestError(401, [
+      new LoginFailedError('user.login', message),
+    ]));
   };
   db.user.findOne({
     where: {
@@ -106,7 +115,6 @@ userController.login = (req: Object, res: Object, next: Function) => {
       _reject(LOGIN_ERROR);
     });
   }).catch((e) => {
-    log.error(e);
     _reject(LOGIN_ERROR);
   });
 };
@@ -128,13 +136,16 @@ userController.delete = (req: Object, res: Object, next: Function) => {
         message: `Deleted user with _id = ${req.token._id}`,
       });
     }
-    return res.bad().error('FailedDelete', 'user.delete',
-            `User with _id = ${req.token._id} not found`).resolve(404);
+    return next(new RequestError(404, [
+      new FailedDeleteError('user.delete',
+        `User with _id = ${req.token._id} not found`),
+    ]));
   })
   .catch((e) => {
     log.error(e);
-    return res.bad().error('FailedDelete', 'user.delete', e.message)
-            .resolve(400);
+    return next(new RequestError(400, [
+      new FailedDeleteError('user.delete', e.message),
+    ]));
   });
 };
 

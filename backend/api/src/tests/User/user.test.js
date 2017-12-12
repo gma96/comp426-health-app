@@ -29,13 +29,14 @@ describe('Users', () => {
   // ***************************************************
   // ** users/                                        **
   // ***************************************************
-  describe('/api/v1/users', () => {
+  describe('/api/v1/users', function() {
+    this.timeout(5000);
     it('creates a new user', (done) => {
       request
         .post('/api/v1/users')
         .send(user1)
         .end((err, res) => {
-          res.should.have.status(200);
+          res.should.have.status(201);
           res.body.should.be.a('object');
           token = res.body.data[0].token;
           done();
@@ -65,7 +66,7 @@ describe('Users', () => {
         .post('/api/v1/users')
         .send(user2)
         .end((err, res) => {
-          res.should.have.status(200);
+          res.should.have.status(201);
           res.body.should.be.a('object');
           token = res.body.data[0].token;
           done();
@@ -228,7 +229,7 @@ describe('Users', () => {
         .delete(routeContext).set('Authorization', `Bearer ${user1Token}`)
         .send()
         .end((err, res) => {
-          res.should.have.status(400);
+          res.should.have.status(404);
           res.body.should.be.a('object');
           done();
         });
@@ -239,7 +240,7 @@ describe('Users', () => {
         .delete(routeContext).set('Authorization', `Bearer ${user2Token}`)
         .send()
         .end((err, res) => {
-          res.should.have.status(400);
+          res.should.have.status(404);
           res.body.should.be.a('object');
           done();
         });
