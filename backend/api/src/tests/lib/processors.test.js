@@ -39,10 +39,27 @@ const testFields = {
       def: ['_id', 'user_id', 'date', 'value', 'createdAt', 'updatedAt'],
       expected: ['rando'],
     },
+  ],
+  blank: [
     {
-      req: [],
+      req: null,
       def: ['_id', 'user_id', 'date', 'value', 'createdAt', 'updatedAt'],
-      expected: [],
+      expected: null,
+    },
+    {
+      req: null,
+      def: ['_id', 'user_id', 'date', 'value', 'createdAt', 'updatedAt'],
+      expected: null,
+    },
+    {
+      req: null,
+      def: ['_id', 'user_id', 'date', 'value', 'createdAt', 'updatedAt'],
+      expected: null,
+    },
+    {
+      req: null,
+      def: ['_id', 'user_id', 'date', 'value', 'createdAt', 'updatedAt'],
+      expected: null,
     },
   ],
 };
@@ -80,6 +97,20 @@ describe('Process Fields', () => {
           });
           e.values.should.be.a('array');
           e.values.should.eql(o.expected);
+          done();
+        });
+    });
+  });
+
+  testFields.blank.forEach((o) => {
+    it('returns null', (done) => {
+      processes.fields('test', o.def, o.req)
+        .then((fields) => {
+          chai.assert(fields == o.expected, 'Expected null');
+          done();
+        })
+        .catch((e) => {
+          chai.assert.fail(0, 1, 'Exception thrown');
           done();
         });
     });

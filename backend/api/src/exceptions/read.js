@@ -1,7 +1,7 @@
 const GenericResourceError = require('./generic-resource');
-module.exports = class ResourceExistsError extends GenericResourceError {
+module.exports = class ResourceReadError extends GenericResourceError {
   constructor(dataPath=null, message=null, values=null) {
-    super('ResourceExistsError', dataPath, message, values);
+    super('ResourceReadError', dataPath, message, values);
     Error.captureStackTrace(this, this.constructor);
   }
 };

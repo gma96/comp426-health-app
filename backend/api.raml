@@ -56,7 +56,7 @@ types:
       user_id:
         type: string
         required: true
-      date:
+      entry_date:
         type: date-only # auto or set
         required: true
       value:
@@ -72,7 +72,7 @@ types:
       user_id:
         type: string
         required: true
-      date:
+      entry_date:
         type: date-only # auto or set
         required: true
       value:
@@ -130,7 +130,16 @@ types:
 securitySchemes:
   jwt:
     type: x-jwt
-
+/test:
+  post:
+    displayName: test
+    securedBy: jwt
+    body:
+      application/json:
+        properties:
+          hello:
+            type: string
+            required: true
 /users:
   post:
     displayName: user.create
@@ -361,7 +370,7 @@ securitySchemes:
     body:
       application/json:
         properties: # Don't need the other properties because JWT tells us
-          date:
+          entry_date:
             type: date-only # auto or set
             required: true
           value:
@@ -378,7 +387,10 @@ securitySchemes:
             properties:
               errors:
                 type: array
-  /{_id}:
+  /{id}:
+    uriParameters:
+      id:
+        type: string
     get:
         displayName: water.read
         description: Get water with _id
