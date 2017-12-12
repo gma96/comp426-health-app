@@ -8,7 +8,7 @@ CREATE TABLE user (
 	birthdate DATE NOT NULL,
 	email VARCHAR(40) NOT NULL,
 	password VARCHAR(300) NOT NULL,
-	height INT UNSIGNED,
+	height FLOAT UNSIGNED,
 	unit ENUM('imperial', 'metric') NOT NULL DEFAULT 'imperial',
 	PRIMARY KEY (_id)
 );

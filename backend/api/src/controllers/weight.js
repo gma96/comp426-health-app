@@ -52,12 +52,14 @@ controller.read = WeightController.read(function(req, resource) {
 });
 
 // Update Resource
-controller.update = WeightController.update(function(req, resource) {
-  if (req.token.unit == 'imperial' && resource.value) {
-    resource.value = _round(convert(resource.value).from('lb')
-                        .to('kg'), 3);
-  }
-  return resource;
+controller.update = WeightController.update({
+  resourceBuilder: function(req, resource) {
+    if (req.token.unit == 'imperial' && resource.value) {
+      resource.value = _round(convert(resource.value).from('lb')
+                          .to('kg'), 3);
+    }
+    return resource;
+  },
 });
 
 // Delete Resource

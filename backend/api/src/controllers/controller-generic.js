@@ -155,12 +155,17 @@ Controller.prototype.read = function(resourceBuilder=null) {
   };
 };
 
-Controller.prototype.update = function(reqBuilder=null) {
+Controller.prototype.update = function(o={}) {
+  let {queryBuilder=null, resourceBuilder=null,
+    updateSuccessBeforeSend=null} = o;
   return (req: Object, res: Object, next: Function) => {
     // Values to change
     let resource = Object.assign({}, req.body);
+    // Not alllowed to update these fields
     if (resource._id) delete resource._id;
     if (resource.user_id) delete resource.user_id;
+    if (resource.createdAt) delete resource.createdAt;
+    if (resource.updatedAt) delete resource.updatedAt;
 
     // Check for differences
     let difference = _difference(Object.keys(resource), this._fields);
@@ -182,10 +187,29 @@ Controller.prototype.update = function(reqBuilder=null) {
       },
       fields: Object.keys(resource), // Fields to update (defaults to all)
     };
-    if (reqBuilder) resource = reqBuilder(req, resource);
+
+    if (queryBuilder) query = queryBuilder(req, query);
+    if (resourceBuilder) resource = resourceBuilder(req, resource);
     this._orm.update(resource, query)
     .then((result) => {
-      if (result[0] == 1) return res.sendStatus(202);
+      if (result[0] == 1) {
+        if (updateSuccessBeforeSend) {
+          delete query.fields;
+          this._orm.findOne(query)
+          .then((result) => {
+            updateSuccessBeforeSend(res, result.dataValues);
+            return res.sendStatus(202);
+          })
+          .catch((e) => {
+            return next(new RequestError(400, [
+              new ResourceUpdateError(
+                `${this._name}.update`, e.message,
+              ),
+            ]));
+          });
+        }
+        else return res.sendStatus(202);
+      }
       else {
         return next(new RequestError(400, [
           new ResourceUpdateError(

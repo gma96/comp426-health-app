@@ -52,12 +52,14 @@ controller.read = WaterController.read(function(req, resource) {
 });
 
 // Update Resource
-controller.update = WaterController.update(function(req, resource) {
-  if (req.token.unit == 'imperial' && resource.value) {
-    resource.value = _round(convert(resource.value).from('fl-oz')
-                        .to('ml'), 3);
-  }
-  return resource;
+controller.update = WaterController.update({
+  resourceBuilder: function(req, resource) {
+    if (req.token.unit == 'imperial' && resource.value) {
+      resource.value = _round(convert(resource.value).from('fl-oz')
+                          .to('ml'), 3);
+    }
+    return resource;
+  },
 });
 
 // Delete Resource
