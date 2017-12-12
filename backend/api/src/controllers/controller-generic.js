@@ -142,8 +142,14 @@ Controller.prototype.update = function(reqBuilder=null) {
     if (reqBuilder) resource = reqBuilder(req, resource);
     this._orm.update(resource, query)
     .then((result) => {
-      // need to add update check
-      return res.sendStatus(202);
+      if (result[0] == 1) return res.sendStatus(202);
+      else {
+        return next(new RequestError(400, [
+          new ResourceUpdateError(
+            `${this._name}.update`, `Update failed, result: ${result}`
+          ),
+        ]));
+      }
     })
     .catch((e) => {
       return next(new RequestError(400, [
