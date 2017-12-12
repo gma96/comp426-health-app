@@ -7,7 +7,10 @@ module.exports = (sequelize, DataTypes) => {
     first_name: DataTypes.STRING,
     last_name: DataTypes.STRING,
     birthdate: DataTypes.DATEONLY,
-    email: DataTypes.STRING,
+    email: {
+      type: DataTypes.STRING,
+      unique: true,
+    },
     password: DataTypes.STRING,
     height: DataTypes.FLOAT,
     unit: DataTypes.ENUM('imperial', 'metric'),

@@ -157,7 +157,7 @@ Controller.prototype.read = function(resourceBuilder=null) {
 
 Controller.prototype.update = function(o={}) {
   let {queryBuilder=null, resourceBuilder=null,
-    updateSuccessBeforeSend=null} = o;
+    updateSuccessBeforeSend=null, uniqueQuery=null} = o;
   return (req: Object, res: Object, next: Function) => {
     // Values to change
     let resource = Object.assign({}, req.body);
@@ -190,41 +190,59 @@ Controller.prototype.update = function(o={}) {
 
     if (queryBuilder) query = queryBuilder(req, query);
     if (resourceBuilder) resource = resourceBuilder(req, resource);
-    this._orm.update(resource, query)
-    .then((result) => {
-      if (result[0] == 1) {
-        if (updateSuccessBeforeSend) {
-          delete query.fields;
-          this._orm.findOne(query)
-          .then((result) => {
-            updateSuccessBeforeSend(res, result.dataValues);
-            return res.sendStatus(202);
-          })
-          .catch((e) => {
-            return next(new RequestError(400, [
-              new ResourceUpdateError(
-                `${this._name}.update`, e.message,
-              ),
-            ]));
-          });
+    let update = () => {
+      this._orm.update(resource, query)
+      .then((result) => {
+        if (result[0] == 1) {
+          if (updateSuccessBeforeSend) {
+            delete query.fields;
+            this._orm.findOne(query)
+            .then((result) => {
+              updateSuccessBeforeSend(res, result.dataValues);
+              return res.sendStatus(202);
+            })
+            .catch((e) => {
+              return next(new RequestError(400, [
+                new ResourceUpdateError(
+                  `${this._name}.update`, e.message,
+                ),
+              ]));
+            });
+          } else return res.sendStatus(202);
+        } else {
+          return next(new RequestError(400, [
+            new ResourceUpdateError(
+              `${this._name}.update`, `Update failed, result: ${result}`
+            ),
+          ]));
         }
-        else return res.sendStatus(202);
-      }
-      else {
-        return next(new RequestError(400, [
+      })
+      .catch((e) => {
+        let errors = [
           new ResourceUpdateError(
-            `${this._name}.update`, `Update failed, result: ${result}`
+            `${this._name}.update`, e.message || 'An error occured :('
           ),
+        ];
+        if (e.errors) {
+          errors = errors.concat([].slice.call(e.errors));
+        }
+        return next(new RequestError(400, errors));
+      });
+    };
+
+    // Check for Unique
+    if (uniqueQuery) {
+      this.isUnique(uniqueQuery(req))
+      .then((bool) => {
+        if (bool) return update();
+        return next(new RequestError(400, [
+          new ResourceExistsError(this._name, 'Resource exists'),
         ]));
-      }
-    })
-    .catch((e) => {
-      return next(new RequestError(400, [
-        new ResourceUpdateError(
-          `${this._name}.update`, e.message || 'An error occured :('
-        ),
-      ]));
-    });
+      })
+      .catch((e) => {
+        e;
+      });
+    } else update();
   };
 };
 
