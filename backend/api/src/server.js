@@ -19,6 +19,8 @@ const handler = function() {
     let token = null;
     if (req.headers['authorization']) {
       token = req.headers['authorization'].split(/\s+/)[1];
+    } else if (req.cookies.token) {
+      token = req.cookies.token;
     } else {
       token = req.headers['x-token'];
     }
@@ -81,6 +83,15 @@ osprey.loadFile(apiDir, authHandler).then((middleware) => {
   if (env !== 'test') app.use(morgan('tiny'));
   app.use(cookieParser());
   app.use(middleware426());
+  app.use(function(req, res, next) {  
+      res.header('Access-Control-Allow-Origin', req.headers.origin);
+      res.header('Access-Control-Allow-Headers',
+                  'Origin, X-Requested-With, Content-Type, Accept');
+      res.header('Access-Control-Allow-Headers', '*');
+      res.header('Access-Control-Allow-Credentials', true);
+      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+      next();
+  });
   app.use('/api/v1', middleware, router);
 
   router.get('/token', handler, (req, res) => {
