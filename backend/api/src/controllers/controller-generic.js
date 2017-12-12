@@ -242,7 +242,8 @@ Controller.prototype.delete = function() {
     // Non-cascading destroy
     this._orm.destroy(query)
       .then((result) => {
-       if (result[0] === 1) {
+       // result is not an array
+       if (result === 1) {
           return res.status(202).json({
             message: `Deleted resource with _id = ${req.token._id}`,
           });
