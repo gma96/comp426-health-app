@@ -57,7 +57,7 @@ controller.list = (req: Object, res: Object, next: Function) => {
 };
 
 controller.read = WaterController.read(function(req, resource) {
-  if (req.token.unit == 'imperial') {
+  if (req.token.unit == 'imperial' && resource.value) {
     resource.value = _round(convert(resource.value).from('ml').to('fl-oz'), 0);
   }
   return resource;

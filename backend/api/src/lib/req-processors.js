@@ -10,7 +10,7 @@ const processors:Object = {};
 // Field Processor
 processors.fields = (_path:string, _fields:Array<string>, reqFields:string) => {
   return new Promise((resolve, reject) => {
-    if (!reqFields) resolve(null);
+    if (reqFields == 'undefined' || reqFields == null) resolve(null);
     let fields:?Array<string> = reqFields.toLowerCase().split(',') || null;
     if (fields) {
       _fields = _fields.map((field:string) => {

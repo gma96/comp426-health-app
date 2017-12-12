@@ -81,6 +81,41 @@ Controller.prototype.read = function(resourceBuilder=null) {
         user_id: req.token._id,
       },
     };
+
+    processes.fields(`${this._name}.read`, this._fields, req.query.fields)
+    .then((fields) => {
+      if (fields) query.attributes = fields;
+      // Find in DB
+      this._orm.findOne(query)
+      .then((result) => {
+        if (resourceBuilder) {
+          return res.build().data(
+            resourceBuilder(req, result.dataValues)).resolve();
+        }
+        return res.build().data(result.dataValues).resolve();
+      })
+      .catch((e) => {
+        return next(new RequestError(400, [
+          new ResourceReadError(`${this._name}.read`,
+            e.message || 'An error occured :('
+          ),
+        ]));
+      });
+    })
+    .catch((e) => {
+      return next(e);
+    });
+  };
+};
+
+Controller.prototype.update = function(resourceBuilder=null) {
+  return (req: Object, res: Object, next: Function) => {
+    let query:Object = {
+      where: {
+        _id: req.params._id,
+        user_id: req.token._id,
+      },
+    };
     processes.fields(`${this._name}.read`, this._fields, req.query.fields)
     .then((fields) => {
       if (fields) query.attributes = fields;
