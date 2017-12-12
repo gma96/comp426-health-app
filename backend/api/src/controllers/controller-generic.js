@@ -8,9 +8,10 @@ const _difference = require('lodash/difference');
 const RequestError = require('../exceptions/request');
 const FailedDeleteError = require('../exceptions/failed-delete');
 const ResourceExistsError = require('../exceptions/exists');
-const ResourceReadError = require('../exceptions/read');
 const ResourceCreateError = require('../exceptions/create');
+const ResourceReadError = require('../exceptions/read');
 const ResourceUpdateError = require('../exceptions/update');
+const ResourceDeleteError = require('../exceptions/delete');
 const ResourceFieldError = require('../exceptions/resource-field');
 /**
  * creates Generic Controller
@@ -92,11 +93,20 @@ Controller.prototype.read = function(resourceBuilder=null) {
       // Find in DB
       this._orm.findOne(query)
       .then((result) => {
-        if (resourceBuilder) {
-          return res.build().data(
-            resourceBuilder(req, result.dataValues)).resolve();
+        if (result) {
+          if (resourceBuilder) {
+            return res.build().data(
+              resourceBuilder(req, result.dataValues)).resolve();
+          }
+          return res.build().data(result.dataValues).resolve();
+        } else {
+          return next(new RequestError(404, [
+            new ResourceReadError(
+              `${this._name}.read`,
+              `Resource with _id = ${req.params._id} doesn't exist`
+            ),
+          ]));
         }
-        return res.build().data(result.dataValues).resolve();
       })
       .catch((e) => {
         return next(new RequestError(400, [
@@ -158,6 +168,43 @@ Controller.prototype.update = function(reqBuilder=null) {
         ),
       ]));
     });
+  };
+};
+
+// Delete
+Controller.prototype.delete = function() {
+  return (req: Object, res: Object, next: Function) => {
+    let query:Object = {
+      where: {
+        _id: req.params._id,
+        user_id: req.token._id,
+      },
+    };
+
+    // Destroy the Resource
+    // Non-cascading destroy
+    this._orm.destroy(query)
+      .then((result) => {
+       if (result[0] === 1) {
+          return res.status(202).json({
+            message: `Deleted resource with _id = ${req.token._id}`,
+          });
+        } else {
+          return next(new RequestError(404, [
+            new ResourceDeleteError(
+              `${this._name}.delete`,
+              `Resource with _id = ${req.params._id} not found`
+            ),
+          ]));
+        }
+      })
+      .catch((e) => {
+        return next(new RequestError(400, [
+          new ResourceDeleteError(
+            `${this._name}.delete`, e.message || 'An error occured :('
+          ),
+        ]));
+      });
   };
 };
 
