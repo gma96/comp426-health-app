@@ -11,10 +11,13 @@ const processors:Object = {};
 processors.fields = (_path:string, _fields:Array<string>, reqFields:string) => {
   return new Promise((resolve, reject) => {
     if (reqFields == 'undefined' || reqFields == null) resolve(null);
-    let fields:?Array<string> = reqFields.toLowerCase().split(',') || null;
+    let fields:?Array<string> = reqFields.split(',') || null;
     if (fields) {
       _fields = _fields.map((field:string) => {
-        return field.toLowerCase();
+        return field.toLowerCase().trim();
+      });
+      fields = fields.map((field:string) => {
+        return field.toLowerCase().trim();
       });
       let difference = _difference(fields, _fields);
       // Check for difference or blank fields, short circuit difference
