@@ -1,11 +1,9 @@
 // @flow
 'use strict';
 // Import NPM Modules
-const shortid = require('shortid');
 const convert = require('convert-units');
 // Custom Modules
 const db = require('../models');
-const log = require('../../../../libs/logger');
 
 const _round = function(value, decimals) {
   return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
@@ -14,7 +12,7 @@ const _round = function(value, decimals) {
 const controller = {};
 const _name:string = 'water';
 const _fields:Array<string> = [
-  '_id', 'user_id', 'date', 'value', 'createdAt', 'updatedAt',
+  '_id', 'user_id', 'entry_date', 'value', 'createdAt', 'updatedAt',
 ];
 
 const Controller = require('../controllers/controller-generic');
@@ -57,25 +55,15 @@ controller.update = WaterController.update(function(req, resource) {
 controller.delete = WaterController.delete();
 
 // Collections Operations
-// TODO
-controller.list = (req: Object, res: Object, next: Function) => {
-  // Find in DB
-  db[_name].findAll({
-    where: {
-      user_id: req.token._id,
-    },
-  })
-  .then((result) => {
-    return res.build().data(result.dataValues).resolve();
-  })
-  .catch((e) => {
-    log.error(e);
-    return res.build().error({
-      type: 'ResourceListError',
-      dataPath: `${_name}.list`,
-      message: e.message || 'An error occured :(',
-    }).resolve(400);
-  });
-};
+controller.list = WaterController.list(function(req, resources) {
+  if (req.token.unit == 'imperial' && resources[0].value) {
+    resources = resources.map((resource) => {
+      resource.value = _round(convert(resource.value).from('ml')
+                        .to('fl-oz'), 0);
+      return resource;
+    });
+  }
+  return resources;
+});
 // Export our controller
 module.exports = controller;

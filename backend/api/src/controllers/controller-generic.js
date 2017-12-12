@@ -13,6 +13,7 @@ const ResourceReadError = require('../exceptions/read');
 const ResourceUpdateError = require('../exceptions/update');
 const ResourceDeleteError = require('../exceptions/delete');
 const ResourceFieldError = require('../exceptions/resource-field');
+const ResourceListError = require('../exceptions/list');
 /**
  * creates Generic Controller
  * @return {Controller}
@@ -209,6 +210,89 @@ Controller.prototype.delete = function() {
 };
 
 
-// Collections functions
+// Collection Operations
+Controller.prototype.list = function(resourceBuilder=null) {
+  return (req: Object, res: Object, next: Function) => {
+    let query:Object = {
+      where: {
+        user_id: req.token._id,
+      },
+    };
+    processes.fields(`${this._name}.list`, this._fields, req.query.fields)
+    .then((fields) => {
+      let pagingQuery = Object.assign({}, query);
+      if (fields) pagingQuery.attributes = fields;
+      // Find in DB
+      this._orm.count(query)
+      .then((count) => {
+        if (count) {
+          // Paging
+          let limit = Math.abs(req.query.per_page) || 30;
+          let page = Math.abs(req.query.page) || 1;
+          let pages = Math.ceil(count / limit);
+          let offset = limit * (page - 1);
+
+          if (page > pages) {
+            return next(new RequestError(400, [
+              new ResourceListError(
+                `${this._name}.list`, `Page ${page} out of range, MAX ${pages}`
+              )]));
+          }
+
+          // Sorting
+          let sortField = req.query.sort || 'entry_date';
+          let sortDirection = req.query.sort_direction || 'DESC';
+
+          // Build Paging Query
+          pagingQuery.limit = limit;
+          pagingQuery.offset = offset;
+          pagingQuery.order = [[sortField, sortDirection.toUpperCase()]];
+
+          // Execute Query
+          this._orm.findAll(pagingQuery)
+            .then((result) => {
+              let resObject = {
+                type: this._name,
+                count: count,
+                pages: pages,
+              };
+
+              // Check for resource builder
+              if (resourceBuilder) {
+                let entries = resourceBuilder(req, result);
+                return res.json(Object.assign({}, resObject, {data: entries}));
+              }
+
+              // Return Data if no resourceBuilder Function
+              return res.json(Object.assign({}, resObject,
+                              {data: result}));
+            })
+            .catch((e) => {
+              return next(new RequestError(400, [
+                new ResourceListError(
+                  `${this._name}.list`, e.message || 'An error occured :('
+                )]));
+            });
+        } else {
+          return next(new RequestError(404, [
+            new ResourceListError(
+              `${this._name}.list`, 'No resources found'
+            ),
+          ]));
+        }
+      })
+      .catch((e) => {
+        return next(new RequestError(400, [
+          new ResourceListError(
+            `${this._name}.list`, e.message || 'An error occured :('
+          ),
+        ]));
+      });
+    })
+    .catch((e) => {
+      return next(e);
+    });
+  };
+};
 
 module.exports = Controller;
