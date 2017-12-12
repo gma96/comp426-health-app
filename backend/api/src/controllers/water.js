@@ -63,39 +63,15 @@ controller.read = WaterController.read(function(req, resource) {
   return resource;
 });
 
-// TODO
-controller.update = (req: Object, res: Object, next: Function) => {
-  // Values to change
-  let values = Object.assign({}, req.body);
-  if (values._id) delete values._id;
-  if (values.user_id) delete values.user_id;
-
-  let options = {
-    where: {
-      _id: req._id,
-    },
-    fields: Object.keys(values), // Fields to update (defaults to all)
-  };
-
-  if (req.token.unit == 'imperial') {
-    // TODO conversion logic
-    // _convert(values.value);
+// Update Resource
+controller.update = WaterController.update(function(req, resource) {
+  if (req.token.unit == 'imperial' && resource.value) {
+    resource.value = _round(convert(resource.value).from('fl-oz')
+                        .to('ml'), 3);
   }
+  return resource;
+});
 
-  // Find in DB
-  db[_name].update(values, options)
-  .then((result) => {
-    return res.build().data(result.dataValues).resolve();
-  })
-  .catch((e) => {
-    log.error(e);
-    return res.build().error({
-      type: 'ResourceUpdateError',
-      dataPath: `${_name}.update`,
-      message: e.message || 'An error occured :(',
-    }).resolve(400);
-  });
-};
 // TODO
 controller.delete = (req: Object, res: Object, next: Function) => {
   // Find in DB and destroy
