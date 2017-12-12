@@ -3,6 +3,7 @@
 // Import NPM Modules
 const shortid = require('shortid');
 const bcrypt = require('bcrypt');
+const convert = require('convert-units');
 // Import local files
 const {LOGIN_ERROR} = require('../config/lang/user-enUs'); // Language File
 const jwt = require('../lib/jwt-manager');
@@ -27,6 +28,15 @@ const TOKEN_SETTINGS = {
   maxAge: 1000 * TOKEN_AGE,
 };
 
+// Add Generic controller support
+const _name:string = 'user';
+const _fields:Array<string> = [
+  '_id', 'first_name', 'last_name', 'birthdate', 'email', 'password', 'height',
+  'unit', 'createdAt', 'updatedAt',
+];
+const Controller = require('../controllers/controller-generic');
+const UserController = new Controller(_name, db.user, _fields);
+
 // Controller to export
 const userController = {};
 
@@ -41,6 +51,10 @@ const _isIdUnique = function(email) {
     });
 };
 
+const _round = function(value, decimals) {
+  return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+};
+
 // Creates a new user if applicable
 userController.create = (req: Object, res: Object, next: Function) => {
   let user = {
@@ -53,6 +67,11 @@ userController.create = (req: Object, res: Object, next: Function) => {
     height: req.body.height,
     unit: userUnitObj[req.body.unit],
   };
+
+  if (user.unit == 'imperial' && user.height) {
+    user.height = _round(convert(user.height).from('in')
+                        .to('cm'), 3);
+  }
 
   _isIdUnique(user.email).then((unique) => {
     if (unique) {
@@ -87,6 +106,10 @@ userController.read = (req: Object, res: Object, next: Function) => {
     .then((user) => {
       user = user.dataValues;
       delete user.password;
+      if (user.unit == 'imperial' && user.height) {
+        user.height = _round(convert(user.height).from('cm')
+                            .to('in'), 0);
+      }
       return res.build().data(user).resolve(200);
     })
     .catch((e) => {
@@ -96,19 +119,50 @@ userController.read = (req: Object, res: Object, next: Function) => {
     });
 };
 
+
+// Update Resource
+userController.update = UserController.update({
+  queryBuilder: function(req, query) {
+    query = Object.assign({}, query);
+    delete query.where;
+    query.where = {
+      _id: req.token._id,
+    };
+    return query;
+  },
+  resourceBuilder: function(req, resource) {
+    if (req.token.unit == 'imperial' && resource.height) {
+      resource.height = _round(convert(resource.height).from('in')
+                          .to('cm'), 3);
+    }
+    return resource;
+  },
+  updateSuccessBeforeSend: function(res, resource) {
+    delete resource.password;
+    let token = jwt.issue(resource, {expiresIn: TOKEN_AGE});
+    res.cookie(TOKEN_NAME, token, TOKEN_SETTINGS);
+    return false;
+  },
+});
+
 // Cascade delete
 userController.delete = (req: Object, res: Object, next: Function) => {
   let where = {where: {_id: req.token._id}};
+  let subWhere = {where: {user_id: req.token._id}};
   Promise.all([
-    // db.goal.destroy(where),
-    // db.water.destroy(where),
-    // db.weight.destroy(where),
-    // db.mindfulness.destroy(where),
-    // db.sleep.destroy(where),
+    // db.goal.destroy(subWhere),
+    db.water.destroy(subWhere),
+    db.weight.destroy(subWhere),
+    // db.mindfulness.destroy(subWhere),
+    // db.sleep.destroy(subWhere),
     db.user.destroy(where),
   ])
   .then((deleted) => {
-    if (deleted[0] === 1) {
+    // returns an array of total deleted count for each destroy request
+    // therefore we need to get the last item in the deleted array
+    // the last item will be the user we deleted
+    let userIndex = deleted.length - 1;
+    if (deleted[userIndex] === 1) {
       return res.status(202).json({
         message: `Deleted user with _id = ${req.token._id}`,
       });

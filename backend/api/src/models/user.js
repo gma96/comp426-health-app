@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     birthdate: DataTypes.DATEONLY,
     email: DataTypes.STRING,
     password: DataTypes.STRING,
-    height: DataTypes.INTEGER,
+    height: DataTypes.FLOAT,
     unit: DataTypes.ENUM('imperial', 'metric'),
   }, {
     freezeTableName: true,

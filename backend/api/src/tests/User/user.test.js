@@ -14,7 +14,6 @@ describe('Users', () => {
     // Delete all users from test
     db.user.destroy({
       where: {},
-      truncate: true,
     });
     server.hookStart(done);
   });

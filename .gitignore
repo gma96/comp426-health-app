@@ -5,6 +5,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# proccessed performance logs
+processed*.txt
+
 # Runtime data
 pids
 *.pid

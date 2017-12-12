@@ -6,6 +6,7 @@ module.exports = (router) => {
     .post(userController.login);
   router.route('/users/me')
     .get(userController.read)
+    .patch(userController.update)
     .delete(userController.delete);
   router.route('/users/me/renew')
     .post(userController.renew);
