@@ -49,8 +49,10 @@ controller.read = SleepController.read(function(req, resource) {
 });
 
 // Update Resource
-controller.update = SleepController.update(function(req, resource) {
-  return resource;
+controller.update = SleepController.update({
+  resourceBuilder: function(req, resource) {
+    return resource;
+  },
 });
 
 // Delete Resource

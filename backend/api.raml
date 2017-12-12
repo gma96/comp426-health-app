@@ -532,7 +532,7 @@ securitySchemes:
       page:
         description: Specify the page that you want to retrieve
         type:        integer
-        required:    true
+        required:    false
         example:     1
       per_page:
         description: Specify the amount of items that will be retrieved per page
@@ -541,6 +541,27 @@ securitySchemes:
         maximum:     200
         default:     30
         example:     50
+      sort:
+        description: Field to sort by
+        enum: [start_datetime, minutes, quality]
+        default: start_datetime
+        required: false
+      sort_direction:
+        description: Direction to sort by
+        enum: [desc, asc]
+        default: desc
+        required: false
+      fields:
+        description: Specify the fields that you want to retrieve
+        type:        string
+        required:    false
+        example:     start_datetime
+      date_start:
+        type: date-only
+        required: false
+      date_end:
+        type: date-only
+        required: false
     responses:
       200:
         body:
@@ -592,6 +613,12 @@ securitySchemes:
         displayName: sleep.read
         description: Get sleep with _id
         securedBy: jwt
+        queryParameters:
+          fields:
+            description: Specify the fields that you want to retrieve
+            type:        string
+            required:    false
+            example:     start_datetime, end_datetime
         responses:
           200:
             body:
@@ -607,6 +634,8 @@ securitySchemes:
         displayName: sleep.update
         description: Update sleep with _id
         securedBy: jwt
+        body:
+          application/json:
         responses:
           202:
           400:
