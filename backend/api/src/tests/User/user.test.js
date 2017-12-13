@@ -3,23 +3,36 @@ const {chai, db, JWTManager, catchLog, user1, user2} = require('./user-setup');
 
 // CHAI http lib
 chai.use(require('chai-http'));
+const server = require('../../server');
+const request = chai.request(server);
+let _isServerReady = false;
+server.hookStart(() => {
+  _isServerReady = true;
+});
+const _closeServer = function(request, callback) {
+  request.server.close();
+  callback();
+};
+
 describe('Users', () => {
-  let server = null;
-  let request = null;
   before(function(done) {
     // Allow time for server to start
-    this.timeout(5000);
-    server = require('../../server');
-    request = chai.request(server);
+    this.timeout(10000);
     // Delete all users from test
     db.user.destroy({
       where: {},
     });
-    server.hookStart(done);
+    let checkSever = () => {
+      return setTimeout(() => {
+        if (_isServerReady) done();
+        else checkSever();
+      }, 500);
+    };
+    checkSever();
   });
 
   // test cleanup
-  after((done) => server.close(done));
+  // after((done) => _closeServer(request, done));
 
   let token;
   let user1Token;

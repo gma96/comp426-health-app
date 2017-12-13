@@ -52,12 +52,23 @@ controller.read = WeightController.read(function(req, resource) {
 });
 
 // Update Resource
-controller.update = WeightController.update(function(req, resource) {
-  if (req.token.unit == 'imperial' && resource.value) {
-    resource.value = _round(convert(resource.value).from('lb')
-                        .to('kg'), 3);
-  }
-  return resource;
+controller.update = WeightController.update({
+  uniqueQuery: function(req) {
+    return {
+      where: {
+        _id: req.params._id,
+        user_id: req.token._id,
+        entry_date: req.body.entry_date,
+      },
+    };
+  },
+  resourceBuilder: function(req, resource) {
+    if (req.token.unit == 'imperial' && resource.value) {
+      resource.value = _round(convert(resource.value).from('lb')
+                          .to('kg'), 3);
+    }
+    return resource;
+  },
 });
 
 // Delete Resource
