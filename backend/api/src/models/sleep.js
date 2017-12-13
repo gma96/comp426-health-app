@@ -11,9 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     minutes: {
       type: new DataTypes.VIRTUAL(DataTypes.INTEGER, ['start_datetime', 'end_datetime']),
       get: function() {
-        var start = new Date(this.get('start_datetime'));
-        var end = new Date(this.get('end_datetime'));
-        return Math.abs(start - end) / 60000;
+        return Math.abs(new Date(this.get('start_datetime')) - new Date(this.get('end_datetime'))) / 60000;
       }
     },
     quality: DataTypes.INTEGER,

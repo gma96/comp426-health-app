@@ -1,14 +1,12 @@
 // @flow
 'use strict';
 // Import NPM Modules
-//const shortid = require('shortid');
-//const _difference = require('lodash/difference');
 const db = require('../models');
-//const log = require('../../../../libs/logger');
 
-// const _convert = function(v:number):number {
-//   return v;
-// };
+// converts from any date format to SQL "YYYY-MM-DD HH:MM:SS" format
+const _convert = function(timestring) {
+  return new Date(timestring).toISOString().slice(0, 19).replace('T', ' ');
+};
 
 const controller = {};
 const _name:string = 'sleep';
@@ -22,20 +20,31 @@ const SleepController = new Controller(_name, db[_name], _fields);
 // CRUD Operations
 // Create Resource
 controller.create = SleepController.create({
-  // uniqueQuery: function(req) {
-  //   return {
-  //     where: {
-  //       entry_date: req.body.entry_date,
-  //     },
-  //   };
-  // },
+  uniqueQuery: function(req) {
+    return {
+      where: {
+        start_datetime: {
+          $lte: _convert(req.body.end_datetime)
+        },
+        end_datetime: {
+          $gte: _convert(req.body.start_datetime),
+        },
+      },
+    };
+  },
   resourceBuilder: function(req) {
     return new Promise((resolve, reject) => {
+      // If the times are reversed, then put them in order. // or just reject
+      if(new Date(req.body.start_datetime).getTime() > new Date(req.body.end_datetime).getTime()) {
+        var temp = req.body.start_datetime;
+        req.body.start_datetime = req.body.end_datetime;
+        req.body.end_datetime = temp;
+      }
+
       let resource = {};
       resource.user_id = req.token._id;
-      resource.start_datetime = new Date(req.body.start_datetime).toISOString().slice(0, 19).replace('T', ' ');
-      resource.end_datetime = new Date(req.body.end_datetime).toISOString().slice(0, 19).replace('T', ' ');
-     // resource.minutes = 10; // required false
+      resource.start_datetime =_convert(req.body.start_datetime);
+      resource.end_datetime = _convert(req.body.end_datetime);
       resource.quality = req.body.quality; // required false
       resource.notes = req.body.notes; // required false
       return resolve(resource);
@@ -63,24 +72,18 @@ controller.list = SleepController.list({
   queryBuilder: function(req, query) {
     query = Object.assign({}, query);
     if (req.query.date_start || req.query.date_end) {
-      query.where.entry_date = {};
       if (req.query.date_start) {
-        query.where.entry_date['gte'] = req.query.date_start;
+        query.where.start_datetime = {};
+        query.where.start_datetime['gte'] = _convert(req.query.date_start);
       }
       if (req.query.date_end) {
-        query.where.entry_date['lte'] = req.query.date_end;
+        query.where.end_datetime = {};
+        query.where.end_datetime['lte'] = _convert(req.query.date_end).slice(0, 10) + " 23:59:59";
       }
     }
     return query;
   },
   resourceBuilder: function(req, resources) {
-    if (req.token.unit == 'imperial' && resources[0].value) {
-      resources = resources.map((resource) => {
-        resource.value = _round(convert(resource.value).from('kg')
-                          .to('lb'), 0);
-        return resource;
-      });
-    }
     return resources;
   },
 });
