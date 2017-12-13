@@ -59,7 +59,22 @@ controller.read = MindfulnessController.read(function(req, resource) {
 
 // Update Resource
 controller.update = MindfulnessController.update({
+  uniqueQuery: function(req) {
+    return {
+      where: {
+        _id: req.params._id,
+        user_id: req.token._id,
+        start_datetime: {
+          $lte: _convert(req.body.end_datetime)
+        },
+        end_datetime: {
+          $gte: _convert(req.body.start_datetime),
+        },
+      },
+    };
+  },
   resourceBuilder: function(req, resource) {
+    // TODO: idk if this is right
     return resource;
   },
 });
