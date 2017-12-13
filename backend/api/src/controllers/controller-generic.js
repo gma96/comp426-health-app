@@ -124,14 +124,12 @@ Controller.prototype.read = function(resourceBuilder=null) {
     .then((fields) => {
       if (fields) query.attributes = fields;
       // Find in DB
-      this._orm.findOne(query)
+      this._orm.findAll(query)
       .then((result) => {
         if (result) {
           if (resourceBuilder) {
-            return res.build().data(
-              resourceBuilder(req, result.dataValues)).resolve();
-          }
-          return res.build().data(result.dataValues).resolve();
+            return res.build().json({data: resourceBuilder(req, result)});
+          } else return res.build().json({data: result});
         } else {
           return next(new RequestError(404, [
             new ResourceReadError(

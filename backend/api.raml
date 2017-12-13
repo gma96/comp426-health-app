@@ -636,6 +636,24 @@ securitySchemes:
         securedBy: jwt
         body:
           application/json:
+            properties:
+              start_datetime:
+                type: datetime
+                required: true
+              end_datetime:
+                type: datetime
+                required: true
+              minutes:
+                type: integer
+                required: false
+              quality:
+                type: integer
+                required: false
+                minimum: 0
+                maximum: 10
+              notes:
+                type: string
+                required: false
         responses:
           202:
           400:
@@ -666,7 +684,7 @@ securitySchemes:
       page:
         description: Specify the page that you want to retrieve
         type:        integer
-        required:    true
+        required:    false
         example:     1
       per_page:
         description: Specify the amount of items that will be retrieved per page

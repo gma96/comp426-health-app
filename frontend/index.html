@@ -2,11 +2,31 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+	<link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet">
+	<style>
+		.brand-primary--gradient {
+		  background: #4776e6; /* fallback for old browsers */
+		  background: -webkit-linear-gradient(to right, #4776e6, #8e54e9); /* Chrome 10-25, Safari 5.1-6 */
+		  background: linear-gradient(to right, #4776e6, #8e54e9);
+		}
+	</style>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <title>426-health-app</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+    	<v-app>
+		  <v-navigation-drawer app></v-navigation-drawer>
+		  <v-toolbar app></v-toolbar>
+		  <v-content>
+		    <v-container fluid>
+		      <router-view></router-view>
+		    </v-container>
+		  </v-content>
+		  <v-footer app></v-footer>
+		</v-app>
+    </div>
     <!-- built files will be auto injected -->
   </body>
 </html>

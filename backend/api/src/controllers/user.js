@@ -150,11 +150,10 @@ userController.delete = (req: Object, res: Object, next: Function) => {
   let where = {where: {_id: req.token._id}};
   let subWhere = {where: {user_id: req.token._id}};
   Promise.all([
-    // db.goal.destroy(subWhere),
     db.water.destroy(subWhere),
     db.weight.destroy(subWhere),
-    // db.mindfulness.destroy(subWhere),
-    // db.sleep.destroy(subWhere),
+    db.mindfulness.destroy(subWhere),
+    db.sleep.destroy(subWhere),
     db.user.destroy(where),
   ])
   .then((deleted) => {

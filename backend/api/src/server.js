@@ -1,5 +1,6 @@
 const express = require('express');
 const osprey = require('osprey');
+const cors = require('cors');
 const join = require('path').join;
 const cookieParser = require('cookie-parser'); // Don't think we're going to use
 const jwt = require('./lib/jwt-manager');
@@ -8,7 +9,7 @@ const RequestError = require('./exceptions/request');
 // Loggers
 const morgan = require('morgan');
 const log = require('../../../libs/logger');
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const env = process.env.NODE_ENV || 'development';
 
 // API Config
@@ -88,15 +89,15 @@ osprey.loadFile(apiDir, authHandler).then((middleware) => {
   if (env !== 'test') app.use(morgan('tiny'));
   app.use(cookieParser());
   app.use(middleware426());
-  app.use(function(req, res, next) {  
-      res.header('Access-Control-Allow-Origin', req.headers.origin);
-      res.header('Access-Control-Allow-Headers',
-                  'Origin, X-Requested-With, Content-Type, Accept');
-      res.header('Access-Control-Allow-Headers', '*');
-      res.header('Access-Control-Allow-Credentials', true);
-      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-      next();
-  });
+  app.use(cors());
+  // app.use(function(req, res, next) {  
+  //     // req.headers.origin
+  //     res.header('Access-Control-Allow-Origin', '*');
+  //     res.header('Access-Control-Allow-Headers', '*');
+  //     res.header('Access-Control-Allow-Credentials', true);
+  //     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  //     next();
+  // });
   app.use('/api/v1', middleware, router);
 
   router.get('/token', handler, (req, res) => {

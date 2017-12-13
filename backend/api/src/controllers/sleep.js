@@ -11,7 +11,8 @@ const _convert = function(timestring) {
 const controller = {};
 const _name:string = 'sleep';
 const _fields:Array<string> = [
-  '_id', 'user_id', 'start_datetime', 'end_datetime', 'quality', 'notes', 'createdAt', 'updatedAt',
+  '_id', 'user_id', 'start_datetime', 'end_datetime', 'quality',
+  'notes', 'minutes', 'createdAt', 'updatedAt',
 ];
 
 const Controller = require('../controllers/controller-generic');
@@ -24,7 +25,7 @@ controller.create = SleepController.create({
     return {
       where: {
         start_datetime: {
-          $lte: _convert(req.body.end_datetime)
+          $lte: _convert(req.body.end_datetime),
         },
         end_datetime: {
           $gte: _convert(req.body.start_datetime),
@@ -53,28 +54,44 @@ controller.create = SleepController.create({
 });
 
 // Read Resource
-controller.read = SleepController.read(function(req, resource) {
-  return resource;
-});
+controller.read = SleepController.read();
 
 // Update Resource
 controller.update = SleepController.update({
   uniqueQuery: function(req) {
-    return {
+    let query = {
       where: {
         _id: req.params._id,
         user_id: req.token._id,
-        start_datetime: {
-          $lte: _convert(req.body.end_datetime)
-        },
-        end_datetime: {
-          $gte: _convert(req.body.start_datetime),
-        },
       },
     };
+    if (req.body.start_datetime && req.body.end_datetime) {
+      // If the times are reversed, then put them in order. // or just reject
+      if(new Date(req.body.start_datetime).getTime() > 
+         new Date(req.body.end_datetime).getTime()) {
+        var temp = req.body.start_datetime;
+        req.body.start_datetime = req.body.end_datetime;
+        req.body.end_datetime = temp;
+      }
+    }
+    query.where.start_datetime = req.body.start_datetime;
+    query.where.end_datetime = req.body.end_datetime;
+    return query;
   },
   resourceBuilder: function(req, resource) {
-    // TODO: idk if this is right
+    resource = Object.assign({}, resource);
+    if (req.body.start_datetime && req.body.end_datetime) {
+      // If the times are reversed, then put them in order. // or just reject
+      if(new Date(req.body.start_datetime).getTime() > 
+         new Date(req.body.end_datetime).getTime()) {
+        var temp = req.body.start_datetime;
+        req.body.start_datetime = req.body.end_datetime;
+        req.body.end_datetime = temp;
+      }
+    }
+
+    if(resource.start_datetime) resource.start_datetime = _convert(req.body.start_datetime);
+    if(resource.end_datetime) resource.end_datetime = _convert(req.body.end_datetime);
     return resource;
   },
 });

@@ -11,7 +11,8 @@ const _convert = function(timestring) {
 const controller = {};
 const _name:string = 'mindfulness';
 const _fields:Array<string> = [
-  '_id', 'user_id', 'start_datetime', 'end_datetime', 'activity', 'notes', 'createdAt', 'updatedAt',
+  '_id', 'user_id', 'start_datetime', 'end_datetime', 'activity', 
+  'notes', 'minutes', 'createdAt', 'updatedAt',
 ];
 
 const Controller = require('../controllers/controller-generic');
@@ -60,18 +61,24 @@ controller.read = MindfulnessController.read(function(req, resource) {
 // Update Resource
 controller.update = MindfulnessController.update({
   uniqueQuery: function(req) {
-    return {
+    let query = {
       where: {
         _id: req.params._id,
         user_id: req.token._id,
-        start_datetime: {
-          $lte: _convert(req.body.end_datetime)
-        },
-        end_datetime: {
-          $gte: _convert(req.body.start_datetime),
-        },
       },
     };
+    if (req.body.start_datetime && req.body.end_datetime) {
+      // If the times are reversed, then put them in order. // or just reject
+      if(new Date(req.body.start_datetime).getTime() > 
+         new Date(req.body.end_datetime).getTime()) {
+        var temp = req.body.start_datetime;
+        req.body.start_datetime = req.body.end_datetime;
+        req.body.end_datetime = temp;
+      }
+    }
+    query.where.start_datetime = req.body.start_datetime;
+    query.where.end_datetime = req.body.end_datetime;
+    return query;
   },
   resourceBuilder: function(req, resource) {
     // TODO: idk if this is right
