@@ -53,6 +53,15 @@ controller.read = WaterController.read(function(req, resource) {
 
 // Update Resource
 controller.update = WaterController.update({
+  uniqueQuery: function(req) {
+    return {
+      where: {
+        _id: req.params._id,
+        user_id: req.token._id,
+        entry_date: req.body.entry_date,
+      },
+    };
+  },
   resourceBuilder: function(req, resource) {
     if (req.token.unit == 'imperial' && resource.value) {
       resource.value = _round(convert(resource.value).from('fl-oz')

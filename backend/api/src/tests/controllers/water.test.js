@@ -154,6 +154,61 @@ generator(100, {
       });
     });
 
+    resources.forEach(function(o, i){
+      it('denies update exists water resource', function(done) {
+          o['value'] = 10;
+          request
+            .patch(`/api/v1/water/${createdIds[i]}`)
+            .set('Authorization', `Bearer ${token}`)
+            .send(o)
+            .end((err, res) => {
+              res.should.have.status(400);
+              done();
+            });
+      });
+    });
+
+    resources.forEach(function(o, i){
+      it('updates value water resource', function(done) {
+          o['value'] = 10; // update object
+          request
+            .patch(`/api/v1/water/${createdIds[i]}`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({value: o.value})
+            .then(res => {
+              res.should.have.status(202);
+              done()
+            })
+            .catch(err => {
+              console.error(err);
+              false.should.eql(true);
+              done();
+            });
+      });
+    });
+
+    resources.forEach(function(o, i){
+      it('checks updated value water resource', function(done) {
+          request
+            .get(`/api/v1/water/${createdIds[i]}`)
+            .set('Authorization', `Bearer ${token}`)
+            .send(o)
+            .then(res => {
+              res.should.have.status(200);
+              res.body.should.be.a('object');
+              let resource = res.body.data[0];
+              resource.entry_date.should.eql(o.entry_date);
+              resource.value.should.eql(10);
+              done()
+            })
+            .catch(err => {
+              console.error(err);
+              false.should.eql(true);
+              done();
+            });
+      });
+    });
+
     resources.forEach(function(o, i) {
       it('deletes created water resource', function(done) {
           request
