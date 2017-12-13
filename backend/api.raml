@@ -588,7 +588,7 @@ securitySchemes:
             required: true
           quality:
             type: integer
-            required: false
+            required: true
             minimum: 0
             maximum: 10
           notes:
@@ -675,6 +675,27 @@ securitySchemes:
         maximum:     200
         default:     30
         example:     50
+      sort:
+        description: Field to sort by
+        enum: [start_datetime, end_datetime, activity, notes]
+        default: start_datetime
+        required: false
+      sort_direction:
+        description: Direction to sort by
+        enum: [desc, asc]
+        default: desc
+        required: false
+      fields:
+        description: Specify the fields that you want to retrieve
+        type:        string
+        required:    false
+        example:     start_datetime
+      date_start:
+        type: date-only
+        required: false
+      date_end:
+        type: date-only
+        required: false
     responses:
       200:
         body:
@@ -699,6 +720,9 @@ securitySchemes:
           end_datetime:
             type: datetime
             required: true
+          activity:
+            type: string
+            required: false
           notes:
             type: string
             required: false
@@ -714,6 +738,9 @@ securitySchemes:
               errors:
                 type: array
   /{_id}:
+    uriParameters:
+      id:
+        type: string
     get:
         displayName: mindfulness.read
         description: Get mindfulness with _id
@@ -739,6 +766,8 @@ securitySchemes:
         displayName: mindfulness.update
         description: Update mindfulness with _id
         securedBy: jwt
+        body:
+          application/json:
         responses:
           202:
           400:

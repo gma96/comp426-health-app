@@ -45,8 +45,8 @@ controller.create = SleepController.create({
       resource.user_id = req.token._id;
       resource.start_datetime =_convert(req.body.start_datetime);
       resource.end_datetime = _convert(req.body.end_datetime);
-      resource.quality = req.body.quality; // required false
-      resource.notes = req.body.notes; // required false
+      resource.quality = req.body.quality;
+      resource.notes = req.body.notes;
       return resolve(resource);
     });
   },

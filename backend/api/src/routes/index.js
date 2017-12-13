@@ -7,4 +7,5 @@ module.exports = (router) => {
   require('./water')(router);
   require('./weight')(router);
   require('./sleep')(router);
+  require('./mindfulness')(router);
 };
