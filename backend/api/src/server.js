@@ -57,9 +57,13 @@ const server = (function() {
   const get = function() {
     return _server;
   };
-  const close = function(c) {
+  const test = function(c) {
     c();
-    return _server.close();
+    return false;
+  };
+  const close = function(c) {
+    console.log('close called');
+    return _server.close(c);
   };
   const address = function() {
     return _server.address();
@@ -74,6 +78,7 @@ const server = (function() {
     close,
     address,
     hookStart,
+    test,
   };
 })();
 
