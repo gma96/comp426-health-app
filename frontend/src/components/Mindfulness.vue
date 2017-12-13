@@ -1,5 +1,5 @@
 <template>   
-   <v-layout row xs12 flex>
+   <v-container row fluid flex>
     <v-flex xs12 sm10 offset-sm1>
       <v-card>
         <v-list two-line>
@@ -19,7 +19,7 @@
         </v-list>
       </v-card>
     </v-flex>
-  </v-layout>
+  </v-container>
 </template>
 <script>
  export default {

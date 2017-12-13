@@ -1,6 +1,6 @@
 <template> 
 <v-container fluid fill-height>  
-   <v-layout row xs12 flex>
+   <v-layout row flex>
     <v-flex xs12 sm10 offset-sm1>
       <v-card>
         <v-list two-line>
@@ -8,9 +8,6 @@
             <v-subheader v-if="item.header" v-text="item.header"></v-subheader>
             <v-divider v-else-if="item.divider" v-bind:inset="item.inset"></v-divider>
             <v-list-tile avatar v-else v-bind:key="item.title" @click="">
-              <!--<v-list-tile-avatar>
-                <img v-bind:src="item.avatar">
-              </v-list-tile-avatar>-->
               <v-list-tile-content>
                 <v-list-tile-title v-html="item.title"></v-list-tile-title>
                 <v-list-tile-sub-title v-html="item.subtitle"></v-list-tile-sub-title>
