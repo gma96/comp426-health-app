@@ -25,6 +25,7 @@ controller.create = WaterController.create({
     return {
       where: {
         entry_date: req.body.entry_date,
+        user_id: req.token._id,
       },
     };
   },
