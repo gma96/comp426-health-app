@@ -7,28 +7,14 @@
     id="dashboard"
     fill-height
   >
-    <v-layout column>
+    <v-layout column>      
       <v-flex xs12 sm12 md12 lg12>
         <v-card>
           <v-card-title primary-title>
             <div class="headline">Your Water consumption</div>
           </v-card-title>
           <v-card-content>
-            <commit-chart />
-          </v-card-content>
-          <v-card-actions>
-            <v-btn flat dark>Listen now</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-flex>
-      
-      <v-flex xs12 sm12 md12 lg12>
-        <v-card>
-          <v-card-title primary-title>
-            <div class="headline">Your Water consumption</div>
-          </v-card-title>
-          <v-card-content>
-            <line-chart :data="waterData" :options="options"/>
+            <line-chart :chart-data="waterData" :options="options"/>
           </v-card-content>
         </v-card>
       </v-flex>
@@ -83,6 +69,36 @@ import CommitChart from '@/components/charts/CommitChart'
 import LineChart from '@/components/charts/LineChart'
 export default {
   components: { CommitChart, LineChart },
+  mounted () {
+    let _self = this;
+    Rest.routes.water.list({
+      query: {
+        sort: 'entry_date',
+        sort_directions: 'desc',
+      },
+    })
+    .then((res) => {
+      let data = res.data.data;
+      let labels = [];
+      let dataset = [];
+      data.map(function(item) {
+        labels.push(item.entry_date);
+        dataset.push(item.value);
+      });
+
+      _self.waterData = {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Water',
+            backgroundColor: '#1976D2',
+            data: dataset,
+          },
+        ],
+      }
+      console.log(_self.waterData)
+    });
+  },
   data () {
     return {
       options: {responsive: true, maintainAspectRatio: false},
