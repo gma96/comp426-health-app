@@ -131,12 +131,23 @@ userController.update = UserController.update({
     return query;
   },
   resourceBuilder: function(req, resource) {
-    let check = resource.unit ? resource.unit : req.token.unit;
-    if (check == 'imperial' && resource.height) {
-      resource.height = _round(convert(resource.height).from('in')
-                          .to('cm'), 3);
-    }
-    return resource;
+    return new Promise((resolve, reject) => {
+      let check = resource.unit ? resource.unit : req.token.unit;
+      if (check == 'imperial' && resource.height) {
+        resource.height = _round(convert(resource.height).from('in')
+                            .to('cm'), 3);
+      }
+      
+      if(resource.password) {
+        console.log('in bycrypt')
+        return bcrypt.hash(resource.password, 10, function(err, hash) {
+            // Store hash in your password DB.
+            resource.password = hash;
+            console.log(resource.password);
+            return resolve(resource);
+        });
+      } else return resolve(resource);
+    });
   },
   updateSuccessBeforeSend: function(res, resource) {
     delete resource.password;

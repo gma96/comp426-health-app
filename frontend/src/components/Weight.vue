@@ -105,15 +105,6 @@ let days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturda
   
   mounted () {
     let _self = this;
-    Rest.routes.user.login({data:{
-    email: 'prestonrobinson@me.com',
-    password: 'leah',
-    }}).then((res) => {
-      let data = res.data.data;
-      console.log(data[0])
-      if(data[0].token) Rest.setToken(data[0].token);
-      _self.updateWeight();
-    }).catch((e) =>{console.log(e)});
   },
   methods: {
     saveWeight: function() {

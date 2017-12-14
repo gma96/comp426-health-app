@@ -63,11 +63,13 @@ controller.update = WeightController.update({
     };
   },
   resourceBuilder: function(req, resource) {
-    if (req.token.unit == 'imperial' && resource.value) {
-      resource.value = _round(convert(resource.value).from('lb')
-                          .to('kg'), 3);
-    }
-    return resource;
+    return new Promise((resolve, reject) => {
+      if (req.token.unit == 'imperial' && resource.value) {
+        resource.value = _round(convert(resource.value).from('lb')
+                            .to('kg'), 3);
+      }
+      return resolve(resource);
+    });
   },
 });
 

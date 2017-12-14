@@ -81,8 +81,10 @@ controller.update = MindfulnessController.update({
     return query;
   },
   resourceBuilder: function(req, resource) {
-    // TODO: idk if this is right
-    return resource;
+    return new Promise((resolve, reject) => {
+      // TODO: idk if this is right
+      return resolve(resource);
+    });
   },
 });
 

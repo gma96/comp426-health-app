@@ -43,6 +43,17 @@
               ref="email"
               required
             ></v-text-field>
+            <v-text-field
+              label="Enter your desired password"
+              hint="At least 8 characters"
+              min="8"
+              v-model="password"
+              :append-icon="showPassword ?  'visibility' : 'visibility_off'"
+              :append-icon-cb="() => (showPassword = !showPassword)"
+              
+              ref="password"
+              :type="showPassword ? 'text' : 'password'"
+            ></v-text-field>
             <v-dialog
               persistent
               v-model="modal"
@@ -87,7 +98,6 @@
               :max="unit == 'metric' ? 244 : 96"
               thumb-label
               v-model="height"
-              :rules="heightRules"
               ref="height"
             ></v-slider>
           </v-card-text>
@@ -146,6 +156,7 @@ const _round = function(value, decimals) {
       last_name: null,
       email: null,
       birthdate: null,
+      password: '',
       unit: null,
       height: null,
       formHasErrors: false,
@@ -157,9 +168,7 @@ const _round = function(value, decimals) {
       updating: false,
       hasChanged: false,
       changingUnit: null,
-      heightRules: [
-        val => val < 10 || `I don't believe you!`,
-      ],
+      showPassword: false,
       emailRules: [
         v => {
           return !!v || 'Email is required'
@@ -174,6 +183,7 @@ const _round = function(value, decimals) {
       .then(function(res) {
         let data = res.data.data[0];
         _self.history = data;
+        _self.history['password'] = '';
         _self.first_name = data.first_name;
         _self.last_name = data.last_name;
         _self.email = data.email;
@@ -185,7 +195,6 @@ const _round = function(value, decimals) {
       })
       .catch((e) => {
         if (e.status = 401) {
-          alert('Session expired');
           Auth.logout();
         }
       })
@@ -199,6 +208,7 @@ const _round = function(value, decimals) {
           birthdate: this.birthdate,
           unit: this.unit,
           height: this.height,
+          password: this.password,
         }
       }
     },
@@ -208,7 +218,7 @@ const _round = function(value, decimals) {
         this.errorMessages = []
       },
       unit () {
-        if (this.history.unit != this.unit) {
+        if (this.history.unit != this.unit && !this.formHasErrors) {
           let toM = 2.54;
           let h = this.height;
           let c = this.changingUnit ? this.changingUnit : this.history.unit;
@@ -245,11 +255,10 @@ const _round = function(value, decimals) {
         console.log(this.history);
         let changed = {};
         Object.keys(this.form).forEach(f => {
-          if (!this.form[f]) this.formHasErrors = true
-          this.$refs[f].validate(true)
+//          if (!this.form[f]) this.formHasErrors = true
+          this.$refs[f].validate(true);
           if (this.form[f] != this.history[f]) changed[f] = this.form[f];
         });
-        console.log(changed);
         if(!this.formHasErrors && Object.keys(changed).length > 0) {
           _self.updateDialog = true;
           _self.updating = true;

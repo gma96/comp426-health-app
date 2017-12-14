@@ -79,20 +79,22 @@ controller.update = SleepController.update({
     return query;
   },
   resourceBuilder: function(req, resource) {
-    resource = Object.assign({}, resource);
-    if (req.body.start_datetime && req.body.end_datetime) {
-      // If the times are reversed, then put them in order. // or just reject
-      if(new Date(req.body.start_datetime).getTime() > 
-         new Date(req.body.end_datetime).getTime()) {
-        var temp = req.body.start_datetime;
-        req.body.start_datetime = req.body.end_datetime;
-        req.body.end_datetime = temp;
+    return new Promise((resolve, reject) => {
+      resource = Object.assign({}, resource);
+      if (req.body.start_datetime && req.body.end_datetime) {
+        // If the times are reversed, then put them in order. // or just reject
+        if(new Date(req.body.start_datetime).getTime() > 
+           new Date(req.body.end_datetime).getTime()) {
+          var temp = req.body.start_datetime;
+          req.body.start_datetime = req.body.end_datetime;
+          req.body.end_datetime = temp;
+        }
       }
-    }
 
-    if(resource.start_datetime) resource.start_datetime = _convert(req.body.start_datetime);
-    if(resource.end_datetime) resource.end_datetime = _convert(req.body.end_datetime);
-    return resource;
+      if(resource.start_datetime) resource.start_datetime = _convert(req.body.start_datetime);
+      if(resource.end_datetime) resource.end_datetime = _convert(req.body.end_datetime);
+      return resolve(resource);
+    });
   },
 });
 
