@@ -8,6 +8,8 @@ import DashView from '@/components/DashView'
 import LoginView from '@/components/LoginView'
 import SignUpView from '@/components/SignUpView'
 import WaterIntake from '@/components/WaterIntake'
+import Sleep from '@/components/Sleep'
+
 
 
 Vue.use(Router);
@@ -82,6 +84,11 @@ export default new Router({
           path: '/water-intake',
           name: 'Water Intake',
           component: WaterIntake,
+        },
+        {
+          path: '/sleep',
+          name: 'Sleep',
+          component: Sleep,
         },
       ],
     },
