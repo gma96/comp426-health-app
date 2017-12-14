@@ -197,7 +197,8 @@ Controller.prototype.update = function(o={}) {
             this._orm.findOne(query)
             .then((result) => {
               updateSuccessBeforeSend(res, result.dataValues);
-              return res.sendStatus(202);
+              if (!res.headerSent) return res.sendStatus(202);
+              return false;
             })
             .catch((e) => {
               return next(new RequestError(400, [

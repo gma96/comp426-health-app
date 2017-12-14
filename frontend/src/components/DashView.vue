@@ -12,7 +12,20 @@
       app
       v-model="drawer"
     >
+    <!-- <v-toolbar flat class="transparent">
+      <v-list class="pa-0">
+        <v-list-tile avatar>
+          <v-list-tile-action>
+            <v-icon>person</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Hi {{ userName }}!</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-toolbar> -->
       <v-list dense>
+      <!--   <v-divider></v-divider> -->
         <template v-for="(item, i) in items">
           <v-layout
             row
@@ -83,18 +96,25 @@
         <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
         <span class="hidden-xs-only"><v-icon>favorite</v-icon> MyHealth</span>
       </v-toolbar-title>
-      <v-text-field
+     <!--  <v-text-field
         light
         solo
         prepend-icon="search"
         placeholder="Search"
         style="max-width: 500px; min-width: 128px"
-      ></v-text-field>
+      ></v-text-field> -->
       <div class="d-flex align-center" style="margin-left: auto">
-        <v-btn icon>
-          <v-icon>apps</v-icon>
-        </v-btn>
-        <v-btn icon>
+        <v-menu bottom left offset-y>
+          <v-btn icon slot="activator" dark>
+            <v-icon>apps</v-icon>
+          </v-btn>
+          <v-list>
+            <v-list-tile @click="logout">
+              <v-list-tile-title>Logout</v-list-tile-title>
+            </v-list-tile>
+          </v-list>
+        </v-menu>
+<!--         <v-btn icon>
           <v-icon>notifications</v-icon>
         </v-btn>
         <v-btn icon large>
@@ -104,7 +124,7 @@
               alt="Vuetify"
             >
           </v-avatar>
-        </v-btn>
+        </v-btn> -->
       </div>
     </v-toolbar>
     <v-container fluid fill-height >
@@ -112,6 +132,10 @@
     </v-container>
 </v-container>
 </template>
+<style lang="css" scoped>
+    #app {background: #fafafa!important;
+    color: rgba(0,0,0,.87);}
+</style>
 
 <script>
   export default {
@@ -119,34 +143,35 @@
       dialog: false,
       drawer: null,
       store: this.$store,
+      userName: '',
       items: [
         { icon: 'dashboard', text: 'Dashboard', path:'/'},
         { icon: 'brightness_7', text: 'Mindfulness', path:'/mindfulness'},
         { icon: 'airline_seat_individual_suite', text: 'Sleep', path:'/sleep' },
         { icon: 'opacity', text: 'Water Intake', path:'/water-intake' },
         { icon: 'cake', text: 'Weight', path:'/weight' },
-        {
-          icon: 'keyboard_arrow_up',
-          'icon-alt': 'keyboard_arrow_down',
-          text: 'Labels',
-          model: true,
-          children: [
-            { icon: 'add', text: 'Create label' }
-          ]
-        },
-        {
-          icon: 'keyboard_arrow_up',
-          'icon-alt': 'keyboard_arrow_down',
-          text: 'More',
-          model: false,
-          children: [
-            { text: 'Import' },
-            { text: 'Export' },
-            { text: 'Print' },
-            { text: 'Undo changes' },
-            { text: 'Other contacts' }
-          ]
-        },
+        // {
+        //   icon: 'keyboard_arrow_up',
+        //   'icon-alt': 'keyboard_arrow_down',
+        //   text: 'Labels',
+        //   model: true,
+        //   children: [
+        //     { icon: 'add', text: 'Create label' }
+        //   ]
+        // },
+        // {
+        //   icon: 'keyboard_arrow_up',
+        //   'icon-alt': 'keyboard_arrow_down',
+        //   text: 'More',
+        //   model: false,
+        //   children: [
+        //     { text: 'Import' },
+        //     { text: 'Export' },
+        //     { text: 'Print' },
+        //     { text: 'Undo changes' },
+        //     { text: 'Other contacts' }
+        //   ]
+        // },
         { icon: 'settings', text: 'Settings', path:'/settings' },
         // { icon: 'chat_bubble', text: 'Send feedback' },
         // { icon: 'help', text: 'Help' },
@@ -158,13 +183,16 @@
       source: String
     },
     methods: {
-      toggleAuthed: function () {
-        this.store.commit('increment');
-        this.store.commit('toggleAuth');
-        console.log(this.store.state.count)
-        console.log(this.store.state.isAuthed)
-        console.log(this.store);
+      logout: function() {
+        Auth.logout();
       },
+    },
+    mounted () {
+      // let _self = this;
+      // Auth.decode(function(e, data) {
+      //   if (e) Auth.logout();
+      //    _self.userName = data.first_name;
+      // });
     }
   }
 </script>

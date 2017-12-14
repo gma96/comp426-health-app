@@ -1,5 +1,5 @@
 <template>
-	<v-app>
+	<v-app v-bind:class="this.$route.path.trim().replace(/^\//i,'').split('/').join('-')">
 	  <v-content>
 	    <v-container fill-height>
 	    	<router-view/>

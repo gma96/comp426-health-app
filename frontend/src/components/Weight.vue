@@ -81,17 +81,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-    <v-btn
-      fab
-      bottom
-      left
-      color="pink"
-      dark
-      fixed
-      @click.stop="toggleAuthed"
-    >
-      <v-icon>add</v-icon>
     </v-btn>
 </v-container>
 </template>
@@ -127,11 +116,6 @@ let days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturda
     }).catch((e) =>{console.log(e)});
   },
   methods: {
-    toggleAuthed: function () {
-      this.store.commit('increment');
-      console.log(this.store.state.count)
-      console.log(this.store);
-    },
     saveWeight: function() {
       // alert(this.date);
       // alert(this.weight);

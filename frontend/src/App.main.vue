@@ -5,7 +5,6 @@
       clipped
       app
       v-model="drawer"
-      v-if="store.state.isAuthed"
     >
       <v-list dense>
         <template v-for="(item, i) in items">

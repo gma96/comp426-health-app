@@ -131,7 +131,8 @@ userController.update = UserController.update({
     return query;
   },
   resourceBuilder: function(req, resource) {
-    if (req.token.unit == 'imperial' && resource.height) {
+    let check = resource.unit ? resource.unit : req.token.unit;
+    if (check == 'imperial' && resource.height) {
       resource.height = _round(convert(resource.height).from('in')
                           .to('cm'), 3);
     }
@@ -139,9 +140,14 @@ userController.update = UserController.update({
   },
   updateSuccessBeforeSend: function(res, resource) {
     delete resource.password;
+    let check = resource.unit ? resource.unit : null;
+    if (check == 'imperial' && resource.height) {
+      resource.height = _round(convert(resource.height).from('cm')
+                          .to('in'), 0);
+    }
     let token = jwt.issue(resource, {expiresIn: TOKEN_AGE});
     res.cookie(TOKEN_NAME, token, TOKEN_SETTINGS);
-    return false;
+    return res.json({data: [{token: token}]});
   },
 });
 
@@ -193,7 +199,7 @@ userController.login = (req: Object, res: Object, next: Function) => {
     where: {
       email: req.body.email,
     },
-    attributes: ['_id', 'email', 'unit', 'password'],
+    // attributes: ['_id', 'email', 'unit', 'password'],
   }).then((user) => {
     bcrypt.compare(req.body.password, user.password, (e, valid: Boolean) => {
       // Check for error
@@ -221,10 +227,10 @@ userController.renew = (req: Object, res: Object, next: Function) => {
   jwt.refreshPreVer(req.token, {}, {expiresIn: TOKEN_AGE})
     .then((refreshed) => {
       res.cookie(TOKEN_NAME, refreshed, TOKEN_SETTINGS);
-      res.json({
+      res.json({data: [{
         _id: req.token._id,
         token: refreshed,
-      });
+      }]});
     })
     .catch((e) => {
       return next(new RequestError(400, [e]));

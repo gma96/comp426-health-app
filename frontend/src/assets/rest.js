@@ -15,6 +15,10 @@ const Rest = (function() {
   };
 
   const _makeRequest = function(props) {
+    // if (_token == null) {
+    //   let token = Auth.getToken();
+    //   if (token) _token = token;
+    // }
     return function(data = {params: {}}) {
       let reqO = {
         method: props.method,
