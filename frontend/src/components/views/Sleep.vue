@@ -1,11 +1,11 @@
 <template>
   <v-layout row flex>
     <v-flex xs12 sm10 offset-sm1 md10 lg10>
-      <v-card>
+      <v-card class="flex">
       <v-progress-linear color="pink" class="processing-el" v-show="loadingUserInfo" v-bind:indeterminate="true"></v-progress-linear>
         <v-card-title primary-title>
           <div>
-            <h3 class="headline mb-0">Mindfulness Entries</h3>
+            <h3 class="headline mb-0">Sleep Entries</h3>
           </div>
         </v-card-title>
 
@@ -14,22 +14,34 @@
         </v-card-text>
 
         <v-card-text class="text-center" v-show="items.length == 0 && !loadingUserInfo">
-          <p class="title">looks like you haven't been mindful yet...</p>
+          <p class="title">looks like you haven't slept yet...</p>
         </v-card-text>
 
-        <v-list two-line v-show="items.length > 0">
+        <v-layout v-show="items.length > 0" lex column>
           <template v-for="item in items">
             <v-subheader v-if="item.header" v-text="item.header"></v-subheader>
             <v-divider v-else-if="item.divider" v-bind:inset="item.inset"></v-divider>
-            <v-list-tile avatar v-else v-bind:key="item.title" @click="">
-              <v-list-tile-content>
+            <v-layout flex row v-else v-bind:key="item.title" class="px-3 pb-3">
+              <v-flex sm9>
                 <v-list-tile-title v-html="item.title"></v-list-tile-title>
                 <v-list-tile-sub-title v-html="item.subtitle"></v-list-tile-sub-title>
                 <v-list-tile-action-text v-html="item.notes"></v-list-tile-action-text>
-              </v-list-tile-content>
-            </v-list-tile>
+              </v-flex>
+              <v-flex sm3 style="text-align:right">
+                <v-progress-circular
+                    v-bind:size="90"
+                    v-bind:width="15"
+                    v-bind:rotate="90"
+                    v-bind:value="item.quality * 10"
+                    color="primary"
+                    class="headline"
+                  >
+                  {{ item.quality }}
+                </v-progress-circular>
+              </v-flex>
+            </v-layout>
           </template>
-        </v-list>
+        </v-layout>
       </v-card>
     </v-flex>
 
@@ -39,7 +51,7 @@
   <v-dialog v-model="dialog" width="800px">
     <v-card>
       <v-card-title class="grey lighten-4 py-4 title">
-        Create mindfulness entry
+        Create sleep entry
       </v-card-title>
       <v-container grid-list-sm class="pa-4">
         <v-layout row wrap ref="form">
@@ -170,6 +182,14 @@
           </v-menu>
         </v-flex><!-- /endTimePicker -->
 
+        <v-select
+          v-bind:items="qualityScale"
+          v-model="quality"
+          label="Select"
+          single-line
+          bottom
+          required
+        ></v-select>
 
         <v-flex xs12>
           <v-text-field
@@ -229,7 +249,7 @@ function convertTo24Hour(time) {
 }
 export default {
   mounted() {
-    this.updateMindfulness();
+    this.updateSleep();
   },
   methods: {
     saveMindfulness: function() {
@@ -239,24 +259,25 @@ export default {
       let data = {
         start_datetime: new Date(this.form.startDate + ' ' + convertTo24Hour(this.form.startTime)).toISOString(),
         end_datetime: new Date(this.form.endDate + ' ' + convertTo24Hour(this.form.endTime)).toISOString(),
+        quality: this.form.quality,
       }
-      
+  
       if (this.form.notes) data.notes = this.form.notes;
       
-      Rest.routes.mindfulness.create({
+      Rest.routes.sleep.create({
         data: data
       }).then((res) => {
         if (res.status == 201) {
-          _self.updateMindfulness();
+          _self.updateSleep();
         }
       }).catch((res) => {
         if(res.status == 401) Auth.logout();
       });
     },
-    updateMindfulness: function() {
+    updateSleep: function() {
       let _self = this;
       self.loadingUserInfo = true;
-      Rest.routes.mindfulness.list({
+      Rest.routes.sleep.list({
         query: {
           sort_directions: 'desc',
         }
@@ -266,8 +287,9 @@ export default {
           let d = new Date(item.start_datetime);
           return {
             title: `On ${days[d.getUTCDay()]} ${month[d.getUTCMonth()]} ${d.getUTCDate()}`,
-            subtitle: `You meditated ${item.minutes} minutes`,
+            subtitle: `You slept for ${item.minutes} minutes`,
             notes: `Notes: ${item.notes}`,
+            quality: item.quality,
           }
         });
         _self.items = data;
@@ -289,6 +311,7 @@ export default {
     return {
       dialog: false,
       loadingUserInfo: false,
+      qualityScale: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       menuStartDate: false,
       menuStartTime: false,
       startDate: null,
@@ -297,6 +320,7 @@ export default {
       menuEndTime: false,
       endDate: null,
       endTime: null,
+      quality: null,
       notes: null,
       e: {
         startDate: [],
@@ -318,6 +342,7 @@ export default {
           startTime: this.startTime,
           endDate: this.endDate,
           endTime: this.endTime,
+          quality: this.quality,
           notes: this.notes,
         }
       }

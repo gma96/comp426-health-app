@@ -1,8 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Dashboard from '@/components/Dashboard'
-import Mindfulness from '@/components/Mindfulness'
+import Mindfulness from '@/components/views/Mindfulness'
 import Settings from '@/components/views/Settings'
+import Sleep from '@/components/views/Sleep'
 import Weight from '@/components/Weight'
 import DashView from '@/components/DashView'
 import LoginView from '@/components/LoginView'
@@ -60,27 +61,32 @@ export default new Router({
       children: [
         {
           path: '/',
-          name: 'Dashboard',
+          name: 'My Dashboard',
           component: Dashboard,
         },
         {
           path: '/mindfulness',
-          name: 'Mindfulness',
+          name: 'My Mindfulness',
           component: Mindfulness,
         },
         {
           path: '/weight',
-          name: 'Weight',
+          name: 'My Weight',
           component: Weight,
         },
         {
+          path: '/Sleep',
+          name: 'My Sleep',
+          component: Sleep,
+        },
+        {
           path: '/settings',
-          name: 'Your Settings',
+          name: 'My Settings',
           component: Settings,
         },
         {
           path: '/water-intake',
-          name: 'Water Intake',
+          name: 'My Water Intake',
           component: WaterIntake,
         },
       ],

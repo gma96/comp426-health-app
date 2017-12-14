@@ -15,7 +15,7 @@ const Auth = function(publicKey) {
             // do something
             return setTimeout(function() {
               if (expired()) logout();
-            }, 30000);
+            }, 10000);
         }
     };
   })();
