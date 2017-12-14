@@ -7,35 +7,19 @@
     id="dashboard"
     fill-height
   >
-    <v-layout column>      
+    <v-layout column>
+    
       <v-flex xs12 sm12 md12 lg12>
-        <v-card>
-          <v-card-title primary-title>
-            <div class="headline">Your Water consumption</div>
-          </v-card-title>
-          <v-card-content>
-            <line-chart :chart-data="waterData" :options="options"/>
-          </v-card-content>
-        </v-card>
-      </v-flex>
-      
-      <v-flex xs12 sm12 md12 lg12>
-        <v-card color="purple" class="white--text">
+        <v-card color="cyan darken-2" class="white--text">
           <v-container fluid grid-list-lg>
             <v-layout row>
               <v-flex xs7>
                 <div>
-                  <div class="headline">Halycon Days</div>
-                  <div>Ellie Goulding</div>
+                  <div class="headline">Mindfulness</div>
+                  <div>With the mindfulness tracker, track the times of day you were mindful, along with any notes you may have about the experience. </div>
                 </div>
               </v-flex>
-              <v-flex xs5>
-                  <v-card-media
-                    src="/static/doc-images/cards/halcyon.png"
-                    height="125px"
-                    contain
-                  ></v-card-media>
-              </v-flex>
+              
             </v-layout>
           </v-container>
         </v-card>
@@ -46,21 +30,46 @@
             <v-layout row>
               <v-flex xs7>
                 <div>
-                  <div class="headline">Halycon Days</div>
-                  <div>Ellie Goulding</div>
+                  <div class="headline">Sleep</div>
+                  <div>Similar to the mindfulness tracker, the sleep tracker allows you to record the times of day you were asleep, along with any notes you may have about the experience.</div>
                 </div>
               </v-flex>
-              <v-flex xs5>
-                  <v-card-media
-                    src="/static/doc-images/cards/halcyon.png"
-                    height="125px"
-                    contain
-                  ></v-card-media>
-              </v-flex>
+              
             </v-layout>
           </v-container>
         </v-card>
       </v-flex>
+       <v-flex xs12 sm12 md12 lg12>
+        <v-card color="cyan darken-2" class="white--text">
+          <v-container fluid grid-list-lg>
+            <v-layout row>
+              <v-flex xs7>
+                <div>
+                  <div class="headline">Water Intake</div>
+                  <div>With the water intake tracker, track your daily water intake by entering a date along with the amount of water you've drinken.</div>
+                </div>
+              </v-flex>
+              
+            </v-layout>
+          </v-container>
+        </v-card>
+      </v-flex>
+      <v-flex xs12 sm12 md12 lg12>
+        <v-card color="purple" class="white--text">
+          <v-container fluid grid-list-lg>
+            <v-layout row>
+              <v-flex xs7>
+                <div>
+                  <div class="headline">Weight</div>
+                  <div>With the weight tracker, track your weight over time by entering a date along with your current weight at that time.</div>
+                </div>
+              </v-flex>
+             
+            </v-layout>
+          </v-container>
+        </v-card>
+      </v-flex>
+
     </v-layout>
   </v-container>
 </template>
