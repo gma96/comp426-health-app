@@ -204,7 +204,7 @@ Controller.prototype.update = function(o={}) {
                   });
                 } else {
                   updateSuccessBeforeSend(res, result.dataValues);
-                  if (!res.headerSent) return res.sendStatus(202);
+                  if (!res.headersSent) return res.sendStatus(202);
                   return false;
                 }
               })

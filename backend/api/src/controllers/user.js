@@ -158,7 +158,7 @@ userController.update = UserController.update({
     }
     let token = jwt.issue(resource, {expiresIn: TOKEN_AGE});
     res.cookie(TOKEN_NAME, token, TOKEN_SETTINGS);
-    return res.json({data: [{token: token}]});
+    return res.status(202).json({data: [{token: token}]});
   },
 });
 

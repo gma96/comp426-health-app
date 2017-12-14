@@ -1,13 +1,33 @@
 'use strict';
 const jwt = require('jsonwebtoken');
 const Auth = function(publicKey) {
+  let _trigger = null;
+  const expired = function() {
+    let token = getToken();
+    if (!token) return true; 
+    return jwt.decode(token, publicKey).exp * 1000 < Date.now();
+  };
+  const trigger = (function() {
+    let executed = false;
+    return function() {
+        if (!executed) {
+            executed = true;
+            // do something
+            return setTimeout(function() {
+              if (expired()) logout();
+            }, 30000);
+        }
+    };
+  })();
   const getToken = function() {
     return JSON.parse(localStorage.getItem('token'));
   };
   const storeToken = function(token) {
+    _trigger = trigger();
     return localStorage.setItem('token', JSON.stringify(token));
   };
   const destroyToken = function() {
+    clearTimeout(_trigger);
     return localStorage.setItem('token', null);
   };
   const logout = function() {
@@ -20,6 +40,7 @@ const Auth = function(publicKey) {
   jwt.verify(getToken(), publicKey, function(e) {
     if (e) logout();
   });
+
   return {
     authed: function() {
       return new Promise(function(resolve, reject) {
@@ -29,12 +50,12 @@ const Auth = function(publicKey) {
             if (e.name == 'TokenExpiredError') logout();
             return reject(false);
           }
-          resolve({status: true, user:decoded});
+          resolve({status: true, user: decoded});
         });
       });
     },
-    decode: function(callback) {
-      return jwt.verify(getToken(), publicKey, callback);
+    decode: function() {
+      return jwt.decode(getToken(), publicKey);
     },
     store: storeToken,
     logout: logout,

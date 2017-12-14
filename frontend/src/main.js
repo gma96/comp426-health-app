@@ -6,7 +6,7 @@ import App from './App';
 import router from './router';
 // Rest Requestor library
 const Rest = require('./assets/rest');
-const Auth = require('./assets/auth')('fjskak;flksdajklfjlksd;aj');
+const Auth = require('./assets/auth')('-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs9zVFBmm7dQIhYKXyjWYnSLD91Un7s9pdU9+bQNloy/Usp/ivvypU4J62FdVCwvFENfkr0ZNuhYtqJY2Ou7ThfNAd5Rx9PyXx5P7NXAuWozNklTV8ndFhrpj/U22tthbTzZpR8d1iyBK8+6uaOYdzHbY3VyfbudGMv5OsiBEpPpIj1JKOp1zJjX7YNZFMFt2UVVVeX7t5YQT4JReAlWhp3TFq1J3M5MXLVZOIcl04Vc0hUqvmYOlpfg+U1cW6kGU2IwGIA9iyL+dprvJpprBHpQgrQaczRjwrmBt/mD4vAHgM1BcYRtW+TxW4Bqxv49RpdOGpI371pNba86A1a9g2wIDAQAB\n-----END PUBLIC KEY-----');
 // Load JS route definitions
 const apiRouteMap = require('./assets/routes');
 // Load Routes

@@ -7,6 +7,7 @@ import Weight from '@/components/Weight'
 import DashView from '@/components/DashView'
 import LoginView from '@/components/LoginView'
 import SignUpView from '@/components/SignUpView'
+import WaterIntake from '@/components/WaterIntake'
 
 
 Vue.use(Router);
@@ -76,6 +77,11 @@ export default new Router({
           path: '/settings',
           name: 'Your Settings',
           component: Settings,
+        },
+        {
+          path: '/water-intake',
+          name: 'Water Intake',
+          component: WaterIntake,
         },
       ],
     },

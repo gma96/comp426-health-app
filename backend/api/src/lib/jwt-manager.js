@@ -1,6 +1,6 @@
 'use strict';
 const JWT = require('jsonwebtoken');
-const {PUBLIC_KEY, PRIVATE_KEY} = require('../config/keys');
+const {PUBLIC_KEY, PRIVATE_KEY, ALGO} = require('../config/keys');
 const {TOKEN_REVOKED} = require('../config/constants');
 
 const JWTManager = (() => {
@@ -12,7 +12,7 @@ const JWTManager = (() => {
 
   const issue = (payload={}, opts={expiresIn: undefined}) => {
     if (opts.expiresIn === undefined) opts.expiresIn = 60 * 15;
-    return JWT.sign(payload, PRIVATE_KEY, opts);
+    return JWT.sign(payload, PRIVATE_KEY, Object.assign({}, opts, ALGO));
   };
 
   const _scrubPayload = (payload) => {
