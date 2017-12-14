@@ -5,6 +5,7 @@ import Mindfulness from '@/components/Mindfulness'
 import Weight from '@/components/Weight'
 import DashView from '@/components/DashView'
 import LoginView from '@/components/LoginView'
+import WaterIntake from '@/components/WaterIntake'
 
 
 Vue.use(Router);
@@ -34,6 +35,11 @@ export default new Router({
           path: '/weight',
           name: 'Weight',
           component: Weight,
+        },
+        {
+          path: '/water-intake',
+          name: 'Water Intake',
+          component: WaterIntake,
         },
       ],
     },
